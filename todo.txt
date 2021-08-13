@@ -1,0 +1,34 @@
+TODO: 
+//RENTER
+renter dashboard
+add rooms
+
+
+//GUEST
+guest dashboard
+book rooms
+search with date
+filter
+review
+cancellation
+
+
+//ADMIN
+who manages hotel in booking.com
+commisiion
+how verification done
+
+
+
+renter history:
+booking...
+checkin...
+checkout...
+calendar
+Search
+
+Admin:
+temporary account suspension
+verification of data
+registerd hotels
+amount calculation
