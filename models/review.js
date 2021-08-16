@@ -22,7 +22,19 @@ const reviewSchema = new mongoose.Schema({
     reviewedOn:{
         type:String,
         required:true
-    }
+    },
+    numberOfDays:{
+        type:Number,
+        required:true
+    },
+    name:{
+        type:String,
+        required:true
+    },
+    bookingId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+      },
 });
 
 const Review = mongoose.model("review", reviewSchema);

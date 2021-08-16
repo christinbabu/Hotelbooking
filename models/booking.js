@@ -35,6 +35,9 @@ const bookingSchema = new mongoose.Schema({
 reviewId:{
   type:mongoose.Schema.Types.ObjectId,
   default:null
+},
+bookingMode:{
+  type:String,
 }
 });
 

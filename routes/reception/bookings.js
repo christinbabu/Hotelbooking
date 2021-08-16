@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const _ = require("lodash");
 const mongoose = require("mongoose");
-const renterMiddleware = require("../../middleware/renter");
+const receptionMiddleware = require("../../middleware/reception");
 const auth = require("../../middleware/auth");
 const getDays = require("../../utils/getDays");
 const {Hotel} = require("../../models/hotel");
@@ -12,7 +12,7 @@ const {Guest} = require("../../models/guest");
 const {retrieveMainPhotobyPath, retrieveMainPhoto} = require("../../utils/retrieveImages");
 const validateObjectId = require("../../middleware/validateObjectId");
 
-router.get("/", [auth, renterMiddleware], async (req, res) => {
+router.get("/", [auth, receptionMiddleware], async (req, res) => {
   let finalData = [];
   let bookings;
   console.log(req.query);

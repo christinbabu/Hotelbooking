@@ -6,7 +6,7 @@ async function retrieveMainPhoto(hotel) {
         const imageType = path.extname(item?.mainPhoto).slice(1);
         
         const {error, response} = await convertImageToBase64(item?.mainPhoto);
-        if (error) console.log("something went wrong");
+        if (error) console.log("something went wrong","f");
         if (response) item["mainPhoto"] = `data:image/${imageType};base64,` + response;
       }
       return hotel
@@ -16,7 +16,7 @@ async function retrieveMainPhotobyPath(imagePath) {
         const imageType = path.extname(imagePath).slice(1);
         
         const {error, response} = await convertImageToBase64(imagePath);
-        if (error) console.log("something went wrong");
+        if (error) console.log("something went wrong","d");
         if (response) data = `data:image/${imageType};base64,` + response;
       return data
 }

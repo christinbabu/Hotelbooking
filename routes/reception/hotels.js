@@ -3,21 +3,21 @@ const express = require("express");
 const router = express.Router();
 
 const auth = require("../../middleware/auth");
-const renterMiddleware = require("../../middleware/renter");
+const receptionMiddleware = require("../../middleware/reception");
 const validate = require("../../middleware/validate");
 const validateObjectId = require("../../middleware/validateObjectId");
 const {validateHotel, Hotel} = require("../../models/hotel");
-const findRenter = require("../../utils/findRenter");
+const findReception = require("../../utils/findReception");
 const createFolder = require("../../utils/createFolder");
 const {retrieveMainPhoto, retrieveOtherPhotos} = require("../../utils/retrieveImages");
 const saveImagesandGetPath = require("../../utils/saveImagesandGetPath");
 
-router.get("/", [auth, renterMiddleware], async (req, res) => {
+router.get("/", [auth, receptionMiddleware], async (req, res) => {
   let {pageNumber, pageSize} = req.query;
   pageNumber = Number(pageNumber);
   pageSize = Number(pageSize);
 
-  const {hotels} = await findRenter(req.user.username);
+  const {hotels} = await findReception(req.user.username);
   let hotel = await Hotel.find({
     _id: {
       $in: hotels,
@@ -39,7 +39,7 @@ router.get("/", [auth, renterMiddleware], async (req, res) => {
   res.send(hotelsData);
 });
 
-router.get("/:id", [auth, renterMiddleware, validateObjectId], async (req, res) => {
+router.get("/:id", [auth, receptionMiddleware, validateObjectId], async (req, res) => {
   console.log("abc");
   let hotel = [await Hotel.findById(req.params.id)];
   if (!hotel[0]) return res.status(404).send("hotel with given id not found");
@@ -48,7 +48,7 @@ router.get("/:id", [auth, renterMiddleware, validateObjectId], async (req, res) 
   res.send(hotel);
 });
 
-router.post("/", [auth, renterMiddleware, validate(validateHotel)], async (req, res) => {
+router.post("/", [auth, receptionMiddleware, validate(validateHotel)], async (req, res) => {
   createFolder(req.user.username);
   await saveImagesandGetPath(req);
   
@@ -59,15 +59,15 @@ router.post("/", [auth, renterMiddleware, validate(validateHotel)], async (req, 
   req.body.starRating=starRating
   const hotel = new Hotel(req.body);
   await hotel.save();
-  const renter = await findRenter(req.user.username);
-  renter.hotels.push(hotel._id);
-  await renter.save();
+  const reception = await findReception(req.user.username);
+  reception.hotels.push(hotel._id);
+  await reception.save();
   res.send(hotel);
 });
 
 router.put(
   "/:id",
-  [auth, renterMiddleware, validateObjectId, validate(validateHotel)],
+  [auth, receptionMiddleware, validateObjectId, validate(validateHotel)],
   async (req, res) => {
     await saveImagesandGetPath(req);
 
@@ -80,7 +80,7 @@ router.put(
   }
 );
 
-router.delete("/:id", [auth, renterMiddleware, validateObjectId], async (req, res) => {
+router.delete("/:id", [auth, receptionMiddleware, validateObjectId], async (req, res) => {
   const hotel = await Hotel.findByIdAndDelete(req.params.id);
   if (!hotel) return res.status(404).send("hotel with given id not found");
   res.send(hotel);

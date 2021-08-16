@@ -43,6 +43,10 @@ const adminSchema = new mongoose.Schema({
     type: Object,
     default: null,
   },
+  hotels:{
+    type: Array,
+    default:[]
+  }
 });
 
 adminSchema.methods.generateAuthToken = function () {
@@ -51,6 +55,7 @@ adminSchema.methods.generateAuthToken = function () {
       _id: this._id,
       username: this.username,
       isAdmin: this.isAdmin,
+      email:this.email,
     },
     process.env.JWT_AUTH_PRIVATE_KEY
   );
@@ -89,8 +94,8 @@ function validateAdmin(data) {
 function validateAdminPassword(data) {
   const schema = Yup.object({
     oldpassword: Yup.string(),
-    password: Yup.string().required("Password is required").min(6).max(256).label("Password"),
-    confirmPassword: Yup.string().oneOf([Yup.ref("password"), null], "Passwords must match"),
+    newPassword: Yup.string().required("Password is required").min(6).max(256).label("Password"),
+    confirmPassword: Yup.string().oneOf([Yup.ref("newPassword"), null], "Passwords must match"),
   });
 
   return schema.validate(data);

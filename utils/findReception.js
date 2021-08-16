@@ -1,15 +1,15 @@
-const {Renter} = require("../models/renter");
+const {Reception} = require("../models/reception");
 
 module.exports = async function (userId) {
   let user;
   userId = userId.toLowerCase();
 
-  user = await Renter.findOne({
+  user = await Reception.findOne({
     email: userId,
   });
 
   if (!user) {
-    user = await Renter.findOne({
+    user = await Reception.findOne({
       username: userId,
     });
   }

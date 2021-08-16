@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Yup = require("yup");
 const jwt = require("jsonwebtoken");
 
-const renterSchema = new mongoose.Schema({
+const receptionSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -31,40 +31,40 @@ const renterSchema = new mongoose.Schema({
     type: Object,
     default: null,
   },
-  hotels: {
-    type: Array,
-    default: [],
+  hotelId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
   },
 });
 
-renterSchema.methods.generateAuthToken = function () {
+receptionSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
     {
       _id: this._id,
       username: this.username,
-      isRenter: true,
+      isreception: true,
     },
     process.env.JWT_AUTH_PRIVATE_KEY
   );
   return token;
 };
 
-renterSchema.methods.generateResetToken = function () {
+receptionSchema.methods.generateResetToken = function () {
   const token = jwt.sign(
     {
       _id: this._id,
       email: this.email,
-      isRenter: true,
+      isreception: true,
     },
     process.env.JWT_CHANGEPASSWORD_PRIVATE_KEY
   );
   return token;
 };
 
-const Renter = mongoose.model("renter", renterSchema);
+const Reception = mongoose.model("reception", receptionSchema);
 
 
-function validateRenter(data) {
+function validateReception(data) {
   const schema = Yup.object().shape({
     name: Yup.string().min(2).max(50).required("Name is required").label("Name"),
     email: Yup.string().required("Email is required").email("Email must be valid").label("Email"),
@@ -78,16 +78,16 @@ function validateRenter(data) {
   return schema.validate(data);
 }
 
-function validateRenterPassword(data) {
+function validateReceptionPassword(data) {
   const schema = Yup.object({
     oldpassword: Yup.string(),
-    password: Yup.string().required("Password is required").min(6).max(256).label("Password"),
-    confirmPassword: Yup.string().oneOf([Yup.ref("password"), null], "Passwords must match"),
+    newPassword: Yup.string().required("Password is required").min(6).max(256).label("Password"),
+    confirmPassword: Yup.string().oneOf([Yup.ref("newPassword"), null], "Passwords must match"),
   });
 
   return schema.validate(data);
 }
 
-exports.Renter = Renter;
-exports.validateRenter = validateRenter;
-exports.validateRenterPassword = validateRenterPassword;
+exports.Reception = Reception;
+exports.validateReception = validateReception;
+exports.validateReceptionPassword = validateReceptionPassword;

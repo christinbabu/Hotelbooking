@@ -6,6 +6,7 @@ const validateObjectId = require("../../middleware/validateObjectId");
 const {Hotel} = require("../../models/hotel");
 const {Review} = require("../../models/review");
 const {Guest} = require("../../models/guest");
+const {Booking} = require("../../models/booking");
 
 router.get("/:id", [validateObjectId], async (req, res) => {
   const {reviewIds} = await Hotel.findById(req.params.id).select({reviewIds: 1, _id: 0});
@@ -22,20 +23,41 @@ router.get("/:id", [validateObjectId], async (req, res) => {
 
 router.post("/:id", [auth, guestMiddleware, validateObjectId], async (req, res) => {
   const hotelId = req.params.id;
+  const {bookingId} = req.body;
   const {previousBookedHotelDetails} = await Guest.findById(req.user._id);
   let eligibleToReview = previousBookedHotelDetails.includes(hotelId);
   if (!eligibleToReview) return res.status(400).send("You are not elligible to review");
-  
-  let reviewedOn=new Date().toLocaleString('en-us',{ day:'numeric',month:'long',year:'numeric'})
+
+  let result
+  result=await Review.findOne({bookingId})
+  console.log(result,"nn")
+  if(result) return res.status(400).send("You have already reviewed")
+
+  let reviewedOn = new Date().toLocaleString("en-us", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  result = await Booking.findById(bookingId).select({startingDayOfStay: 1, endingDayOfStay: 1});
+
+  let date1 = new Date(result.startingDayOfStay);
+  let date2 = new Date(result.endingDayOfStay);
+  let diffDays = Math.round((date2 - date1) / (1000 * 60 * 60 * 24), 10);
+
   req.body.guestId = req.user._id;
   req.body.hotelId = hotelId;
-  req.body.reviewedOn= reviewedOn;
+  req.body.reviewedOn = reviewedOn;
+  req.body.numberOfDays = diffDays + 1;
+  req.body.name = req.user.name;
+
   const review = new Review(req.body);
   await review.save();
   await Hotel.findByIdAndUpdate(hotelId, {$push: {reviewIds: review._id}});
   await Guest.findByIdAndUpdate(req.user._id, {
     $push: {reviewedHotelIds: hotelId, reviewIds: review._id},
   });
+
+  await Booking.findByIdAndUpdate(bookingId, {reviewId:review._id})
   res.send(review);
 });
 

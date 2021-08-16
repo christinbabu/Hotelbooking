@@ -139,37 +139,13 @@ const hotelSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
-  isPrepaymentRequired: {
-    type: Boolean,
-    required: true,
-  },
   provideDormitoryForDriver: {
     type: Boolean,
     required:true
   },
-  GST: {
-    type: Boolean,
-    required: true,
-  },
-  tradeName: {
-    type: String,
-  },
-  GSTIN: {
-    type: String,
-  },
-  panCardNumber: {
-    type: String,
-    required:true
-  },
-  state: {
-    type: String,
-    required:true
-  },
-  paymentAddress:{
-    type:String,
-    required:true,
-    min:8,
-    max:255
+  receptionId:{
+    type:mongoose.Schema.Types.ObjectId,
+    default:null
   }
 });
 
@@ -205,19 +181,6 @@ function validateHotel(data) {
     accomodateChildren: Yup.boolean().required(),
     allowPets: Yup.boolean().required(),
     provideDormitoryForDriver: Yup.boolean().required(),
-    isPrepaymentRequired: Yup.boolean().required(),
-    GST: Yup.boolean().required(),
-    tradeName: Yup.string().when("GST", {
-      is: true,
-      then: Yup.string().required("Trade name is required"),
-    }),
-    GSTIN: Yup.string().when("GST", {
-      is: true,
-      then: Yup.string().required("GSTIN is required"),
-    }),
-    panCardNumber: Yup.string().required(),
-    state: Yup.string().required(),
-    paymentAddress:Yup.string().required().min(8).max(255),
   }) 
   return schema.validate(data);
 }
