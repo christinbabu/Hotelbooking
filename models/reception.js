@@ -42,7 +42,8 @@ receptionSchema.methods.generateAuthToken = function () {
     {
       _id: this._id,
       username: this.username,
-      isreception: true,
+      isReception: true,
+      hotelId:this.hotelId,
     },
     process.env.JWT_AUTH_PRIVATE_KEY
   );

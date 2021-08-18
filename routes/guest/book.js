@@ -16,7 +16,8 @@ router.get("/", async (req, res) => {
   let {placeForSearch, selectedDayRange, pageNumber, pageSize, filterOptions} = req.query;
   pageNumber = Number(pageNumber);
   pageSize = Number(pageSize);
-  placeForSearch = placeForSearch.toLowerCase();
+  console.log(placeForSearch,"ps")
+  // placeForSearch = placeForSearch.toLowerCase();
   let allTheDays;
   selectedDayRange=JSON.parse(selectedDayRange)
 
@@ -24,7 +25,7 @@ router.get("/", async (req, res) => {
     allTheDays = getDays(selectedDayRange);
   }
 
-  let hotel = [await Hotel.findOne({placeForSearch})];
+  let hotel = [await Hotel.findOne({city:placeForSearch})];
   if (!hotel[0]) return res.status(404).send("hotel with given id not found");
   hotel = await retrieveMainPhoto(hotel);
   hotel = await retrieveOtherPhotos(hotel);

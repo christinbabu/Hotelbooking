@@ -25,20 +25,21 @@ const bookingSchema = new mongoose.Schema({
     type: Object,
     required: true,
   },
-  bookedOn:{
-    type:String,
-    required:true
-},isStayCompleted:{
-  type:Boolean,
-  default:false
-},
-reviewId:{
-  type:mongoose.Schema.Types.ObjectId,
-  default:null
-},
-bookingMode:{
-  type:String,
-}
+  bookedOn: {
+    type: String,
+    required: true,
+  },
+  isStayCompleted: {
+    type: Boolean,
+    default: false,
+  },
+  reviewId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null,
+  },
+  bookingMode: {
+    type: String,
+  },
 });
 
 const Booking = mongoose.model("booking", bookingSchema);

@@ -10,7 +10,7 @@ const {Booking} = require("../../models/booking");
 
 router.get("/:id", [validateObjectId], async (req, res) => {
   const {reviewIds} = await Hotel.findById(req.params.id).select({reviewIds: 1, _id: 0});
-  if (reviewIds.length === 0) return res.send("no review yet");
+  if (reviewIds.length === 0) return res.status(404).send("no review yet");
 
   const reviews = await Review.find({
     _id: {
