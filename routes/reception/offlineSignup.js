@@ -11,8 +11,11 @@ const receptionMiddleware = require("../../middleware/reception");
 router.get("/", [auth, receptionMiddleware], async (req, res) => {
   let email = await OfflineGuest.findOne({email: req.query.userId.toLowerCase()});
   let mobile = await OfflineGuest.findOne({phoneNumber: req.query.userId});
-  if (mobile || email) return res.send({isGuestExist:true});
-  else return res.send({isGuestExist:false});
+  let userId
+  if(email) userId=email._id
+  if(mobile) userId=mobile._id
+  if (mobile || email) return res.send({userId,isGuestExist:true});
+  else res.send({userId,isGuestExist:false});
 });
 
 router.post("/", [auth, receptionMiddleware, validate(validateOfflineGuest)], async (req, res) => {
@@ -26,8 +29,7 @@ router.post("/", [auth, receptionMiddleware, validate(validateOfflineGuest)], as
 
   const offlineGuest = new OfflineGuest(req.body);
   await offlineGuest.save();
-  const token = offlineGuest.generateAuthToken();
-  res.send(token);
+  res.send({userId:offlineGuest._id,isGuestExist:true});
 });
 
 module.exports = router;

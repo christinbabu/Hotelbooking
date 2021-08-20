@@ -10,13 +10,7 @@ const hotelSchema = new mongoose.Schema({
   },
   starRating: {
     type: Number,
-    enum: [0,1,2,3,4,5],
-  },
-  contactName: {
-    type: String,
-    required: true,
-    minlength: 2,
-    maxlength: 50,
+    enum: [0, 1, 2, 3, 4, 5],
   },
   phoneNumber: {
     type: String,
@@ -35,12 +29,6 @@ const hotelSchema = new mongoose.Schema({
     maxlength: 255,
   },
   city: {
-    type: String,
-    required: true,
-    minlength: 1,
-    maxlength: 50,
-  },
-  placeForSearch: {
     type: String,
     required: true,
     minlength: 1,
@@ -68,7 +56,7 @@ const hotelSchema = new mongoose.Schema({
   },
   facilities: {
     type: Array,
-    default:[]
+    default: [],
   },
   extraBed: {
     type: Boolean,
@@ -76,9 +64,9 @@ const hotelSchema = new mongoose.Schema({
   },
   noOfExtraBeds: {
     type: Number,
-    min:1,
-    max:4,
-    default:null
+    min: 1,
+    max: 4,
+    default: null,
   },
   startingRatePerDay: {
     type: Number,
@@ -103,11 +91,19 @@ const hotelSchema = new mongoose.Schema({
     required: true,
     enum: [],
   },
-  checkIn: {
+  checkInStart: {
     type: String,
     required: true,
   },
-  checkOut: {
+  checkInEnd: {
+    type: String,
+    required: true,
+  },
+  checkOutStart: {
+    type: String,
+    required: true,
+  },
+  checkOutEnd: {
     type: String,
     required: true,
   },
@@ -141,12 +137,12 @@ const hotelSchema = new mongoose.Schema({
   },
   provideDormitoryForDriver: {
     type: Boolean,
-    required:true
+    required: true,
   },
-  receptionId:{
-    type:mongoose.Schema.Types.ObjectId,
-    default:null
-  }
+  receptionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null,
+  },
 });
 
 const Hotel = mongoose.model("hotel", hotelSchema);
@@ -155,14 +151,12 @@ function validateHotel(data) {
   const schema = Yup.object().shape({
     hotelName: Yup.string().min(1).max(50).required(),
     starRating: Yup.string().oneOf(["","1", "2", "3", "4", "5"]).nullable(),
-    contactName: Yup.string().required().min(2).max(50),
     phoneNumber: Yup.string()
       .required()
       .length(12)
       .matches(/^[0-9]+$/, "Mobile number must include only numbers"),
     address: Yup.string().required().min(8).max(255),
     city: Yup.string().required().min(1).max(50),
-    placeForSearch: Yup.string().required().min(1).max(50),
     postalCode: Yup.string()
       .required()
       .length(6)
@@ -176,12 +170,14 @@ function validateHotel(data) {
     photos: Yup.array().nullable(),
     freeCancellationAvailable: Yup.string().required(),
     ifNotCancelledBeforeDate: Yup.string(),
-    checkIn: Yup.string().required(),
-    checkOut: Yup.string().required(),
+    checkInStart: Yup.string().required(),
+    checkInEnd: Yup.string().required(),
+    checkOutStart: Yup.string().required(),
+    checkOutEnd: Yup.string().required(),
     accomodateChildren: Yup.boolean().required(),
     allowPets: Yup.boolean().required(),
     provideDormitoryForDriver: Yup.boolean().required(),
-  }) 
+  });
   return schema.validate(data);
 }
 

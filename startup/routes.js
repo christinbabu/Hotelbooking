@@ -21,6 +21,7 @@ const guestChangePassword = require("../routes/guest/changePassword");
 const receptionSignin = require("../routes/reception/signin");
 const receptionSignup = require("../routes/reception/signup");
 const receptionForgot = require("../routes/reception/forgot");
+const offlineBooking=require("../routes/reception/bookings")
 const hotels = require("../routes/reception/hotels");
 const rooms = require("../routes/admin/rooms");
 const receptionChangePassword = require("../routes/reception/changePassword");
@@ -50,6 +51,7 @@ module.exports = function (app) {
   app.use("/api/reception/signin", receptionSignin);
   app.use("/api/reception/signup", receptionSignup);
   app.use("/api/reception/offlinesignup", offlineSignup);
+  app.use("/api/reception/booking", offlineBooking);
   app.use("/api/reception/forgot", receptionForgot);
   app.use("/api/reception/hotel", hotels);
   app.use("/api/reception/room", rooms);

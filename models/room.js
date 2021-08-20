@@ -14,6 +14,10 @@ const roomSchema = new mongoose.Schema({
     min: 1,
     max: 9999,
   },
+  roomNumbers:{
+    type:Array,
+    required: true,
+  },
   kindOfBed: {
     type: String,
     required: true,
@@ -67,6 +71,7 @@ function validateRoom(data) {
   const schema = Yup.object().shape({
     roomType: Yup.string().min(1).max(50).required(),
     numberOfRoomsOfThisType: Yup.number().min(1).max(9999).required(),
+    roomNumbers:Yup.string().required().matches(/^[0-9,]+$/,"Only number seperated by commas allowed"),
     kindOfBed: Yup.string()
       .required()
       .oneOf(["Single bed", "Double bed", "Large bed", "Extra large bed"]),

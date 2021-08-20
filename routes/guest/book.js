@@ -325,7 +325,7 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
   roomData["startingDayOfStay"] = allTheDays[0];
   roomData["endingDayOfStay"] = allTheDays[allTheDays.length - 1];
   roomData["roomDetails"] = roomsDetails;
-  roomData["bookingMode"]="offline"
+  roomData["bookingMode"]="online"
   // roomData["totalPrice"] = totalPrice;
 
   const booking = new Booking(roomData);
