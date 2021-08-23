@@ -68,6 +68,12 @@ const hotelSchema = new mongoose.Schema({
     max: 4,
     default: null,
   },
+  pricePerExtraBed: {
+    type: Number,
+    min: 5,
+    max: 10000,
+    default: null,
+  },
   startingRatePerDay: {
     type: Number,
     required: true,
@@ -150,7 +156,7 @@ const Hotel = mongoose.model("hotel", hotelSchema);
 function validateHotel(data) {
   const schema = Yup.object().shape({
     hotelName: Yup.string().min(1).max(50).required(),
-    starRating: Yup.string().oneOf(["","1", "2", "3", "4", "5"]).nullable(),
+    starRating: Yup.string().oneOf(["", "1", "2", "3", "4", "5"]).nullable(),
     phoneNumber: Yup.string()
       .required()
       .length(12)
@@ -166,6 +172,7 @@ function validateHotel(data) {
     facilities: Yup.array(),
     extraBed: Yup.boolean().required(),
     noOfExtraBeds: Yup.number().min(1).max(4),
+    pricePerExtraBed: Yup.number().min(5).max(10000),
     mainPhoto: Yup.mixed().required(),
     photos: Yup.array().nullable(),
     freeCancellationAvailable: Yup.string().required(),

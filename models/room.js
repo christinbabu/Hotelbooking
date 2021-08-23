@@ -18,6 +18,10 @@ const roomSchema = new mongoose.Schema({
     type:Array,
     required: true,
   },
+  availableRoomNumbers:{
+    type:Array,
+    required: true,
+  },
   kindOfBed: {
     type: String,
     required: true,

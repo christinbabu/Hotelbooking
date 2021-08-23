@@ -60,6 +60,7 @@ router.post("/", [auth, adminMiddleware, validate(validateRoom)], async (req, re
   createFolder(req.user.username);
   await saveImagesandGetPath(req);
   req.body.roomNumbers=req.body.roomNumbers.split(",");
+  req.body.availableRoomNumbers=req.body.roomNumbers
   const room = new Room(req.body);
   await room.save();
 
@@ -84,6 +85,7 @@ router.put("/:id", [auth, adminMiddleware, validateObjectId, validate(validateRo
   await saveImagesandGetPath(req,method="put");
   console.log("after")
   req.body.roomNumbers=req.body.roomNumbers.split(",");
+  req.body.availableRoomNumbers=req.body.roomNumbers
   const room = await Room.findByIdAndUpdate(req.params.id, req.body, {new: true});
   if (!room) return res.status(404).send("room with given Id not found");
 

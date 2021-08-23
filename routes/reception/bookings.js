@@ -83,58 +83,176 @@ router.get("/guest", [auth, receptionMiddleware], async (req, res) => {
 });
 
 router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
-  console.log("aa");
   var dateObj = new Date();
-let month = dateObj.getUTCMonth() + 1; //months from 1-12
-let day = dateObj.getUTCDate();
-let year = dateObj.getUTCFullYear();
-month=month.toString()
-if(month.length==1){
-  month="0"+month
-}
-
-newdate = year + "-" + month + "-" + day;
-console.log(newdate);
-  const bookings = await Booking.find({
-    startingDayOfStay: newdate,
-  }).lean();
-  if(!bookings[0]) return res.status(404).send("No bookings for today")
-
-  let finalData=[]
-  console.log(bookings)
-  // _.each(bookings, async (booking,index)=>{
-  //   let guest= await Guest.findById(booking.guestId)
-  //   if(!guest) guest= await OfflineGuest.findById(booking.guestId)
-  //   console.log(guest,"gst")
-  //   bookings[index]["name"] = guest.name
-  //   bookings[index]["email"] = guest.email
-  //   bookings[index]["phoneNumber"] = guest?.phoneNumber||"919164253030"
-  //   finalData.push(bookings[index])
-  //   console.log(index,"i")
-  //   if (index == bookings.length - 1) {
-  //     sendData();
-  //   }
-  // })
-  // setTimeout(()=>{
-  //   console.log(finalData)
-  //     res.send(finalData);
-  // },3000)
-
-  for(i=0; i<bookings.length; i++){
-      let guest= await Guest.findById(bookings[i].guestId)
-    if(!guest) guest= await OfflineGuest.findById(bookings[i].guestId)
-    console.log(guest,"gst")
-    bookings[i]["name"] = guest.name
-    bookings[i]["email"] = guest.email
-    bookings[i]["phoneNumber"] = guest?.phoneNumber||"919164253030"
-    finalData.push(bookings[i])
+  let month = dateObj.getUTCMonth() + 1; //months from 1-12
+  let day = dateObj.getUTCDate();
+  let year = dateObj.getUTCFullYear();
+  month = month.toString();
+  if (month.length == 1) {
+    month = "0" + month;
   }
-res.send(finalData)
-  function sendData() {
-    console.log("sending");
-    // console.log(finalData);
-    res.send(finalData);
+
+  newdate = year + "-" + month + "-" + day;
+  const bookings = await Booking.find().where("startingDayOfStay").eq(newdate).lean();
+  if (!bookings[0]) return res.status(404).send("No bookings for today");
+
+  let finalData = [];
+
+  for (i = 0; i < bookings.length; i++) {
+    let guest = await Guest.findById(bookings[i].guestId);
+    if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
+    bookings[i]["name"] = guest.name;
+    bookings[i]["email"] = guest.email;
+    bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
+    finalData.push(bookings[i]);
   }
+  res.send(finalData);
+});
+
+router.get("/upcoming", [auth, receptionMiddleware], async (req, res) => {
+  let {selectedDayRange} = req.query;
+  console.log(selectedDayRange, "sdr");
+  let allTheDays;
+  if (selectedDayRange) {
+    selectedDayRange = JSON.parse(selectedDayRange);
+    allTheDays = getDays(selectedDayRange);
+  }
+
+  var dateObj = new Date();
+  let month = dateObj.getUTCMonth() + 1; //months from 1-12
+  let day = dateObj.getUTCDate();
+  let year = dateObj.getUTCFullYear();
+  month = month.toString();
+  if (month.length == 1) {
+    month = "0" + month;
+  }
+
+  newdate = year + "-" + month + "-" + day;
+  let bookings;
+  if (selectedDayRange?.from) {
+    bookings = await Booking.find()
+      .where("startingDayOfStay")
+      .gte(allTheDays[0])
+      .lte(allTheDays[allTheDays.length - 1])
+      .lean();
+  } else {
+    bookings = await Booking.find().where("startingDayOfStay").gt(newdate).lean();
+  }
+  if (!bookings[0]) return res.status(404).send("No bookings available");
+
+  let finalData = [];
+
+  for (i = 0; i < bookings.length; i++) {
+    let guest = await Guest.findById(bookings[i].guestId);
+    if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
+    bookings[i]["name"] = guest.name;
+    bookings[i]["email"] = guest.email;
+    bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
+    finalData.push(bookings[i]);
+  }
+  console.log(finalData);
+  res.send(finalData);
+});
+
+router.get("/staying", [auth, receptionMiddleware], async (req, res) => {
+  bookings = await Booking.find().where("status").eq("checkedin").lean();
+
+  if (!bookings[0]) return res.status(404).send("No bookings available");
+
+  let finalData = [];
+
+  for (i = 0; i < bookings.length; i++) {
+    let guest = await Guest.findById(bookings[i].guestId);
+    if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
+    bookings[i]["name"] = guest.name;
+    bookings[i]["email"] = guest.email;
+    bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
+    finalData.push(bookings[i]);
+  }
+  res.send(finalData);
+});
+
+router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
+  const booking = await Booking.findById(req.params.id).lean();
+  // console.log(booking.roomDetails);
+  for (let [key, value] of Object.entries(booking.roomDetails)) {
+    const room = await Room.findById(key);
+    _.assign(value, _.pick(room, ["roomType", "availableRoomNumbers"]));
+    const hotel = await Hotel.findById(room.hotelId).select({
+      extraBed: 1,
+      noOfExtraBeds: 1,
+      pricePerExtraBed: 1,
+    });
+
+    if (hotel.extraBed) {
+      value["pricePerExtraBed"] = hotel.pricePerExtraBed;
+      value["noOfExtraBeds"] = hotel.noOfExtraBeds;
+    }
+    // console.log(value,"vl")
+  }
+  let guest;
+  guest = await Guest.findById(booking.guestId);
+  if (!guest) guest = await OfflineGuest.findById(booking.guestId);
+  _.assign(booking, _.pick(guest, ["name", "phoneNumber", "email"]));
+  let roomFinalDetails={}
+  for(let [key,value] of Object.entries(booking.roomDetails)){
+    _.range(value.numberOfRoomsBooked).map((room,index)=>{
+      value["roomNumber"]=12
+      let tempObject={}
+      tempObject[key+index]=value
+      _.assign(roomFinalDetails,tempObject)
+    })
+  }
+  booking["roomFinalDetails"]=roomFinalDetails
+  // console.log(value)
+  console.log(booking)
+  res.send(booking);
+});
+
+router.get("/completed", [auth, receptionMiddleware], async (req, res) => {
+  let {selectedDayRange} = req.query;
+  console.log(selectedDayRange, "sdr");
+  let allTheDays;
+  if (selectedDayRange) {
+    selectedDayRange = JSON.parse(selectedDayRange);
+    allTheDays = getDays(selectedDayRange);
+  }
+
+  var dateObj = new Date();
+  let month = dateObj.getUTCMonth() + 1; //months from 1-12
+  let day = dateObj.getUTCDate();
+  let year = dateObj.getUTCFullYear();
+  month = month.toString();
+  if (month.length == 1) {
+    month = "0" + month;
+  }
+
+  newdate = year + "-" + month + "-" + day;
+  let bookings;
+  if (selectedDayRange?.from) {
+    bookings = await Booking.find()
+      .where("endingDayOfStay")
+      .gte(allTheDays[0])
+      .lte(allTheDays[allTheDays.length - 1])
+      .where("status")
+      .eq("checkedout")
+      .lean();
+  } else {
+    bookings = await Booking.find().where("status").eq("checkedout").lean();
+  }
+  if (!bookings[0]) return res.status(404).send("No bookings available");
+
+  let finalData = [];
+
+  for (i = 0; i < bookings.length; i++) {
+    let guest = await Guest.findById(bookings[i].guestId);
+    if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
+    bookings[i]["name"] = guest.name;
+    bookings[i]["email"] = guest.email;
+    bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
+    finalData.push(bookings[i]);
+  }
+  res.send(finalData);
 });
 
 router.post("/", [auth, receptionMiddleware], async (req, res) => {

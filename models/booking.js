@@ -40,6 +40,10 @@ const bookingSchema = new mongoose.Schema({
   bookingMode: {
     type: String,
   },
+  status: {
+    type: String,
+    default: "yettostay"
+  },
 });
 
 const Booking = mongoose.model("booking", bookingSchema);

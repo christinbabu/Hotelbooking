@@ -13,9 +13,10 @@ const {retrieveMainPhoto, retrieveOtherPhotos} = require("../../utils/retrieveIm
 const validateObjectId = require("../../middleware/validateObjectId");
 
 router.get("/", async (req, res) => {
-  let {roomIds, selectedDayRange} = req.query;
+  let {roomIds, selectedDayRange,hotelId} = req.query;
   console.log(req.query)
-  let rooms = [await Room.find().where("_id").in(roomIds)];
+  let hotel=await Hotel.findById(hotelId).select({extraBed:1,noOfExtraBeds:1,pricePerExtraBed:1});
+  let rooms = [await Room.find().where("_id").in(roomIds).lean()];
   // console.log(rooms,"rms")
   let finalRoomsData = [];
   let allTheDays;
@@ -57,7 +58,12 @@ router.get("/", async (req, res) => {
 
   finalRoomsData = _.flattenDeep(finalRoomsData);
   for (let room of finalRoomsData) {
-    console.log(room.numberOfRoomsOfThisType)
+    console.log(hotel.noOfExtraBeds,"eb")
+    if(hotel.extraBed){
+      room["noOfExtraBeds"]=hotel.noOfExtraBeds
+      room["extraBed"]=hotel.extraBed
+      room["pricePerExtraBed"]=hotel.pricePerExtraBed
+    }
     _.remove(finalRoomsData,room => room.numberOfRoomsOfThisType ==0);
   }
 
