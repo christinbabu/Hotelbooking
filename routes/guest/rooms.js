@@ -58,12 +58,15 @@ router.get("/", async (req, res) => {
 
   finalRoomsData = _.flattenDeep(finalRoomsData);
   for (let room of finalRoomsData) {
-    console.log(hotel.noOfExtraBeds,"eb")
+    console.log(room._id,"eb")
     if(hotel.extraBed){
       room["noOfExtraBeds"]=hotel.noOfExtraBeds
       room["extraBed"]=hotel.extraBed
       room["pricePerExtraBed"]=hotel.pricePerExtraBed
     }
+  }
+  
+  for(let room of finalRoomsData){
     _.remove(finalRoomsData,room => room.numberOfRoomsOfThisType ==0);
   }
 

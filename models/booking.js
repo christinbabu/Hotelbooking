@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const Yup = require("yup");
+
 
 const bookingSchema = new mongoose.Schema({
   guestId: {
@@ -21,9 +23,21 @@ const bookingSchema = new mongoose.Schema({
     minlength: 8,
     maxlength: 10,
   },
+  identityProof: {
+    type: String,
+    default: null,
+  },
+  identityProofNumber: {
+    type: String,
+    default: null,
+  },
   roomDetails: {
     type: Object,
     required: true,
+  },
+  roomFinalDetails: {
+    type: Array,
+    default: null,
   },
   bookedOn: {
     type: String,
@@ -42,10 +56,21 @@ const bookingSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    default: "yettostay"
+    default: "yettostay",
   },
 });
+
+function validateBooking(data) {
+  const schema = Yup.object().shape({
+    phoneNumber: Yup.string().min(5).max(50).required(),
+    address: Yup.string().min(8, "Too short").max(255, "Too Long!").required("Required"),
+    identityProofNumber: Yup.string().max(30).required("Required"),
+    identityProof: Yup.mixed().required("Identity Proof image is required"),
+  });
+  return schema.validate(data);
+}
 
 const Booking = mongoose.model("booking", bookingSchema);
 
 exports.Booking = Booking;
+exports.validateBooking = validateBooking;

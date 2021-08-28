@@ -21,6 +21,16 @@ const guestSchema = new mongoose.Schema({
     required: true,
     validate: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
   },
+  address: {
+    type: String,
+    default:null
+  },
+  phoneNumber: {
+    type: String,
+    minlength: 5,
+    maxlength: 50,
+    default:null
+  },
   password: {
     type: String,
     required: true,

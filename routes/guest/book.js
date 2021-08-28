@@ -11,240 +11,240 @@ const {Booking} = require("../../models/booking");
 const {Guest} = require("../../models/guest");
 const {retrieveMainPhoto, retrieveOtherPhotos} = require("../../utils/retrieveImages");
 const validateObjectId = require("../../middleware/validateObjectId");
+const days = require("days-in-a-row");
+const JSJoda = require("js-joda");
 
 router.get("/", async (req, res) => {
   let {placeForSearch, selectedDayRange, pageNumber, pageSize, filterOptions} = req.query;
   pageNumber = Number(pageNumber);
   pageSize = Number(pageSize);
-  console.log(placeForSearch,"ps")
+  console.log(placeForSearch, "ps");
   // placeForSearch = placeForSearch.toLowerCase();
   let allTheDays;
-  selectedDayRange=JSON.parse(selectedDayRange)
+  selectedDayRange = JSON.parse(selectedDayRange);
 
   if (selectedDayRange.from) {
     allTheDays = getDays(selectedDayRange);
   }
 
-  let hotel = [await Hotel.findOne({city:placeForSearch})];
+  let hotel = [await Hotel.findOne({city: placeForSearch})];
   if (!hotel[0]) return res.status(404).send("hotel with given id not found");
   hotel = await retrieveMainPhoto(hotel);
   hotel = await retrieveOtherPhotos(hotel);
-  let data={hotels:hotel,numberOfDays:allTheDays?.length}
+  let data = {hotels: hotel, numberOfDays: allTheDays?.length};
   res.send(data);
 
+  //   let hotelFacilities = [
+  //     "Free Wifi",
+  //     "Garden",
+  //     "Water park",
+  //     "Spa and wellness centre",
+  //     "Terrace",
+  //     "Fitness centre",
+  //     "Restaurant",
+  //     "Room service",
+  //     "Bar",
+  //     "Hot tub/jacuzzi",
+  //     "Swimming pool",
+  //     "AC",
+  //   ];
 
-//   let hotelFacilities = [
-//     "Free Wifi",
-//     "Garden",
-//     "Water park",
-//     "Spa and wellness centre",
-//     "Terrace",
-//     "Fitness centre",
-//     "Restaurant",
-//     "Room service",
-//     "Bar",
-//     "Hot tub/jacuzzi",
-//     "Swimming pool",
-//     "AC",
-//   ];
+  //   let otherFacilities = [
+  //     "parking",
+  //     "extraBed",
+  //     "breakfast",
+  //     "accomodateChildren",
+  //     "allowPets",
+  //     "provideDormitoryForDriver",
+  //   ];
 
-//   let otherFacilities = [
-//     "parking",
-//     "extraBed",
-//     "breakfast",
-//     "accomodateChildren",
-//     "allowPets",
-//     "provideDormitoryForDriver",
-//   ];
+  //   let roomFacilities = ["Air Conditioning", "Smart TV", "Television"];
+  //   let starRating = ["1 Star", "2 Star", "3 Star", "4 Star", "5 Star"];
+  //   let rating = ["Above 4/5", "Above 3/5", "Above 2/5"];
 
-//   let roomFacilities = ["Air Conditioning", "Smart TV", "Television"];
-//   let starRating = ["1 Star", "2 Star", "3 Star", "4 Star", "5 Star"];
-//   let rating = ["Above 4/5", "Above 3/5", "Above 2/5"];
+  //   let filteredHotelFacilities = _.intersection(hotelFacilities, filterOptions);
+  //   let filteredRoomFacilities = _.intersection(roomFacilities, filterOptions);
+  //   let filteredStarRating = _.intersection(starRating, filterOptions);
+  //   let filteredRating = _.intersection(rating, filterOptions);
 
-//   let filteredHotelFacilities = _.intersection(hotelFacilities, filterOptions);
-//   let filteredRoomFacilities = _.intersection(roomFacilities, filterOptions);
-//   let filteredStarRating = _.intersection(starRating, filterOptions);
-//   let filteredRating = _.intersection(rating, filterOptions);
+  //   if (filteredStarRating.length > 0) {
+  //     let temp = [];
+  //     for (let element of filteredStarRating) temp.push(Number(_.head(element)));
+  //     filteredStarRating = temp;
+  //   } else {
+  //     filteredStarRating = [0, 1, 2, 3, 4, 5];
+  //   }
 
-//   if (filteredStarRating.length > 0) {
-//     let temp = [];
-//     for (let element of filteredStarRating) temp.push(Number(_.head(element)));
-//     filteredStarRating = temp;
-//   } else {
-//     filteredStarRating = [0, 1, 2, 3, 4, 5];
-//   }
+  //   if (filteredRating.length > 0)
+  //     filteredRating = Number(_.nth(_.last(_.sortBy(filteredRating)), 6));
+  //   else filteredRating = 0;
 
-//   if (filteredRating.length > 0)
-//     filteredRating = Number(_.nth(_.last(_.sortBy(filteredRating)), 6));
-//   else filteredRating = 0;
+  //   let filteredFields = _.pullAll(
+  //     filterOptions,
+  //     _.flattenDeep([hotelFacilities, roomFacilities, starRating, rating])
+  //   );
 
-//   let filteredFields = _.pullAll(
-//     filterOptions,
-//     _.flattenDeep([hotelFacilities, roomFacilities, starRating, rating])
-//   );
+  //   if (filteredFields) {
+  //     filteredFields = _.intersection(
+  //       otherFacilities,
+  //       filteredFields.map(item => _.camelCase(item))
+  //     );
+  //   }
 
-//   if (filteredFields) {
-//     filteredFields = _.intersection(
-//       otherFacilities,
-//       filteredFields.map(item => _.camelCase(item))
-//     );
-//   }
+  //   let extraBed = filteredFields?.includes("extraBed") ? true : [true, false];
+  //   let allowPets = filteredFields?.includes("allowPets") ? true : [true, false];
+  //   let parking = filteredFields?.includes("parking")
+  //     ? ["Yes, Free", "Yes, Paid"]
+  //     : ["No", "Yes, Free", "Yes, Paid"];
+  //   let breakfast = filteredFields?.includes("breakfast")
+  //     ? ["Yes, Free", "Yes, Paid"]
+  //     : ["No", "Yes, Free", "Yes, Paid"];
+  //   let accomodateChildren = filteredFields?.includes("accomodateChildren") ? true : [true, false];
+  //   let provideDormitoryForDriver = filteredFields?.includes("provideDormitoryForDriver")
+  //     ? true
+  //     : [true, false];
 
-//   let extraBed = filteredFields?.includes("extraBed") ? true : [true, false];
-//   let allowPets = filteredFields?.includes("allowPets") ? true : [true, false];
-//   let parking = filteredFields?.includes("parking")
-//     ? ["Yes, Free", "Yes, Paid"]
-//     : ["No", "Yes, Free", "Yes, Paid"];
-//   let breakfast = filteredFields?.includes("breakfast")
-//     ? ["Yes, Free", "Yes, Paid"]
-//     : ["No", "Yes, Free", "Yes, Paid"];
-//   let accomodateChildren = filteredFields?.includes("accomodateChildren") ? true : [true, false];
-//   let provideDormitoryForDriver = filteredFields?.includes("provideDormitoryForDriver")
-//     ? true
-//     : [true, false];
+  //   let selectedProperties = {
+  //     hotelName: 1,
+  //     reviewScore: 1,
+  //     startingRatePerDay: 1,
+  //     mainPhoto: 1,
+  //     city: 1,
+  //   };
 
-//   let selectedProperties = {
-//     hotelName: 1,
-//     reviewScore: 1,
-//     startingRatePerDay: 1,
-//     mainPhoto: 1,
-//     city: 1,
-//   };
+  //   let allTheDays;
+  //   selectedDayRange=JSON.parse(selectedDayRange)
 
-//   let allTheDays;
-//   selectedDayRange=JSON.parse(selectedDayRange)
+  //   if (selectedDayRange.from) {
+  //     allTheDays = getDays(selectedDayRange);
+  //   } else {
+  //     function getQuery() {
+  //       let hotelsQuery = Hotel.find({placeForSearch})
+  //         .where("provideDormitoryForDriver")
+  //         .in(provideDormitoryForDriver)
+  //         .where("accomodateChildren")
+  //         .in(accomodateChildren)
+  //         .where("starRating")
+  //         .in(filteredStarRating)
+  //         .where("reviewScore")
+  //         .gte(filteredRating)
+  //         .where("breakfast")
+  //         .in(breakfast)
+  //         .where("allowPets")
+  //         .in(allowPets)
+  //         .where("extraBed")
+  //         .in(extraBed)
+  //         .where("parking")
+  //         .in(parking);
 
-//   if (selectedDayRange.from) {
-//     allTheDays = getDays(selectedDayRange);
-//   } else {
-//     function getQuery() { 
-//       let hotelsQuery = Hotel.find({placeForSearch})
-//         .where("provideDormitoryForDriver")
-//         .in(provideDormitoryForDriver)
-//         .where("accomodateChildren")
-//         .in(accomodateChildren)
-//         .where("starRating")
-//         .in(filteredStarRating)
-//         .where("reviewScore")
-//         .gte(filteredRating)
-//         .where("breakfast")
-//         .in(breakfast)
-//         .where("allowPets")
-//         .in(allowPets)
-//         .where("extraBed")
-//         .in(extraBed)
-//         .where("parking")
-//         .in(parking);
+  //       if (filteredHotelFacilities.length > 0)
+  //         return hotelsQuery
+  //           .where("facilities")
+  //           .all(filteredHotelFacilities)
+  //           .in(filteredHotelFacilities);
 
-//       if (filteredHotelFacilities.length > 0)
-//         return hotelsQuery
-//           .where("facilities")
-//           .all(filteredHotelFacilities)
-//           .in(filteredHotelFacilities);
+  //       return hotelsQuery;
+  //     }
 
-//       return hotelsQuery;
-//     }
+  //     let hotelsQuery = getQuery();
 
-//     let hotelsQuery = getQuery();
+  //     const roomIds = await hotelsQuery.distinct("hotelRooms");
 
-//     const roomIds = await hotelsQuery.distinct("hotelRooms");
+  //     let roomsQuery = Room.find().where("_id").in(roomIds)
+  //     if (filteredRoomFacilities.length > 0) {
+  //       roomsQuery = roomsQuery
+  //         .where("facilities")
+  //         .all(filteredRoomFacilities)
+  //         .in(filteredRoomFacilities);
+  //     }
 
-//     let roomsQuery = Room.find().where("_id").in(roomIds)
-//     if (filteredRoomFacilities.length > 0) {
-//       roomsQuery = roomsQuery
-//         .where("facilities")
-//         .all(filteredRoomFacilities)
-//         .in(filteredRoomFacilities);
-//     }
+  //     const hotelIds = await roomsQuery.distinct("hotelId");
 
-//     const hotelIds = await roomsQuery.distinct("hotelId");
+  //     hotelsQuery = getQuery();
+  //     let hotels = await Hotel.find()
+  //       .where("_id")
+  //       .in(hotelIds)
+  //       .select(selectedProperties)
+  //       .skip(pageNumber * pageSize)
+  //       .limit(pageSize);
 
-//     hotelsQuery = getQuery();
-//     let hotels = await Hotel.find()
-//       .where("_id")
-//       .in(hotelIds)
-//       .select(selectedProperties)
-//       .skip(pageNumber * pageSize)
-//       .limit(pageSize);
+  //     let hotelsCount = await Hotel.find().where("_id").in(hotelIds).countDocuments();
 
-//     let hotelsCount = await Hotel.find().where("_id").in(hotelIds).countDocuments();
+  //     hotels = await retrieveMainPhoto(hotels);
+  //     hotels = {hotelsCount, hotels,numberOfDays:0};
+  //     return res.send(hotels);
+  //   }
 
-//     hotels = await retrieveMainPhoto(hotels);
-//     hotels = {hotelsCount, hotels,numberOfDays:0};
-//     return res.send(hotels);
-//   }
+  // //? Search with Date
 
+  //   let roomIds = await Hotel.find({placeForSearch}).distinct("hotelRooms")
 
-// //? Search with Date
+  //   let hotelIds = await Room.find()
+  //     .where("_id")
+  //     .in(roomIds)
+  //     .where("bookingFullDates")
+  //     .nin(allTheDays)
+  //     .distinct("hotelId")
 
-//   let roomIds = await Hotel.find({placeForSearch}).distinct("hotelRooms")
+  //     roomIds=await Hotel.find().where("_id").in(hotelIds).distinct("hotelRooms")
 
-//   let hotelIds = await Room.find()
-//     .where("_id")
-//     .in(roomIds)
-//     .where("bookingFullDates")
-//     .nin(allTheDays)
-//     .distinct("hotelId")
+  //     let roomsQuery = Room.find().where("_id").in(roomIds)
 
-//     roomIds=await Hotel.find().where("_id").in(hotelIds).distinct("hotelRooms")
+  //     if (filteredRoomFacilities.length > 0) {
+  //       roomsQuery = roomsQuery
+  //         .where("facilities")
+  //         .all(filteredRoomFacilities)
+  //         .in(filteredRoomFacilities);
+  //     }
 
-//     let roomsQuery = Room.find().where("_id").in(roomIds)
+  //   hotelIds = await roomsQuery.find().distinct("hotelId")
 
-//     if (filteredRoomFacilities.length > 0) {
-//       roomsQuery = roomsQuery
-//         .where("facilities")
-//         .all(filteredRoomFacilities)
-//         .in(filteredRoomFacilities);
-//     }
+  //   function getQuery() {
+  //     let hotelsQuery = Hotel.find()
+  //       .where("_id")
+  //       .in(hotelIds)
+  //       .where("provideDormitoryForDriver")
+  //       .in(provideDormitoryForDriver)
+  //       .where("accomodateChildren")
+  //       .in(accomodateChildren)
+  //       .where("starRating")
+  //       .in(filteredStarRating)
+  //       .where("reviewScore")
+  //       .gte(filteredRating)
+  //       .where("breakfast")
+  //       .in(breakfast)
+  //       .where("allowPets")
+  //       .in(allowPets)
+  //       .where("extraBed")
+  //       .in(extraBed)
+  //       .where("parking")
+  //       .in(parking);
 
-//   hotelIds = await roomsQuery.find().distinct("hotelId")
+  //     if (filteredHotelFacilities.length > 0)
+  //       return hotelsQuery
+  //         .where("facilities")
+  //         .all(filteredHotelFacilities)
+  //         .in(filteredHotelFacilities);
 
-//   function getQuery() {
-//     let hotelsQuery = Hotel.find()
-//       .where("_id")
-//       .in(hotelIds)
-//       .where("provideDormitoryForDriver")
-//       .in(provideDormitoryForDriver)
-//       .where("accomodateChildren")
-//       .in(accomodateChildren)
-//       .where("starRating")
-//       .in(filteredStarRating)
-//       .where("reviewScore")
-//       .gte(filteredRating)
-//       .where("breakfast")
-//       .in(breakfast)
-//       .where("allowPets")
-//       .in(allowPets)
-//       .where("extraBed")
-//       .in(extraBed)
-//       .where("parking")
-//       .in(parking);
+  //     return hotelsQuery;
+  //   }
 
-//     if (filteredHotelFacilities.length > 0)
-//       return hotelsQuery
-//         .where("facilities")
-//         .all(filteredHotelFacilities)
-//         .in(filteredHotelFacilities);
+  //   let hotelsQuery = getQuery();
 
-//     return hotelsQuery;
-//   }
+  //   let hotels = await hotelsQuery
+  //     .select(selectedProperties)
+  //     .skip(pageNumber * pageSize)
+  //     .limit(pageSize);
 
-//   let hotelsQuery = getQuery();
+  //   hotelsQuery = getQuery();
 
-//   let hotels = await hotelsQuery
-//     .select(selectedProperties)
-//     .skip(pageNumber * pageSize)
-//     .limit(pageSize);
+  //   let hotelsCount = await hotelsQuery.countDocuments();
 
-//   hotelsQuery = getQuery();
+  //   for (hotel of hotels) hotel.startingRatePerDay *= allTheDays.length;
 
-//   let hotelsCount = await hotelsQuery.countDocuments();
+  //   hotels = await retrieveMainPhoto(hotels);
 
-//   for (hotel of hotels) hotel.startingRatePerDay *= allTheDays.length;
-
-//   hotels = await retrieveMainPhoto(hotels);
-
-//   res.send({hotels, hotelsCount,numberOfDays:allTheDays.length});
+  //   res.send({hotels, hotelsCount,numberOfDays:allTheDays.length});
 });
 
 //? API get request roomData for getting rooms
@@ -262,9 +262,8 @@ router.get("/", async (req, res) => {
 // }}}
 // }
 
-
 router.get("/:id", [validateObjectId], async (req, res) => {
-  console.log("abc"); 
+  console.log("abc");
   let hotel = [await Hotel.findById(req.params.id)];
   if (!hotel[0]) return res.status(404).send("hotel with given id not found");
   hotel = await retrieveMainPhoto(hotel);
@@ -273,13 +272,14 @@ router.get("/:id", [validateObjectId], async (req, res) => {
 });
 
 router.post("/", [auth, guestMiddleware], async (req, res) => {
-  const {roomDetails, selectedDayRange,hotelId} = req.body;
+  const {roomDetails, selectedDayRange, hotelId} = req.body;
   if (!mongoose.Types.ObjectId.isValid(hotelId)) return res.status(404).send("Invalid hotel Id");
   for (room of roomDetails) {
-    if (!mongoose.Types.ObjectId.isValid(room.roomId)) return res.status(404).send("Invalid room Id");
+    if (!mongoose.Types.ObjectId.isValid(room.roomId))
+      return res.status(404).send("Invalid room Id");
   }
 
-  console.log(selectedDayRange,"sdr")
+  console.log(selectedDayRange, "sdr");
   const allTheDays = getDays(selectedDayRange);
   const roomsDetails = {};
   // let totalPrice = 0;
@@ -290,8 +290,8 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
     roomsDetails[room.roomId] = {
       numberOfRoomsBooked: room.noOfRooms,
       pricePerRoom: roomDB.basePricePerNight,
-      beds:roomDB.numberOfBeds,
-      guests:roomDB.numberOfGuestsInaRoom
+      beds: roomDB.numberOfBeds,
+      guests: roomDB.numberOfGuestsInaRoom,
     };
 
     // totalPrice += roomDB.basePricePerNight * room.noOfRooms;
@@ -312,20 +312,24 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
           return res.status(400).send("Someone already booked, please refresh your page.");
       }
     }
-    
+
     roomDB.markModified("numberOfBookingsByDate", "bookingFullDates");
     await roomDB.save();
     console.log(roomDB);
   }
-  console.log(allTheDays,"ad")
+  console.log(allTheDays, "ad");
   const roomData = {};
   roomData["guestId"] = req.user._id;
   roomData["hotelId"] = hotelId;
-  roomData["bookedOn"]=new Date().toLocaleString('en-us',{ day:'numeric',month:'long',year:'numeric'})
+  roomData["bookedOn"] = new Date().toLocaleString("en-us", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
   roomData["startingDayOfStay"] = allTheDays[0];
   roomData["endingDayOfStay"] = allTheDays[allTheDays.length - 1];
   roomData["roomDetails"] = roomsDetails;
-  roomData["bookingMode"]="online"
+  roomData["bookingMode"] = "online";
   // roomData["totalPrice"] = totalPrice;
 
   const booking = new Booking(roomData);
@@ -333,6 +337,32 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
 
   await Guest.findByIdAndUpdate(req.user._id, {$push: {bookedHotelDetails: booking._id}});
   res.send("Successfully booked");
+});
+
+router.delete("/:id", async (req, res) => {
+  const LocalDate = JSJoda.LocalDate;
+  const booking = await Booking.findByIdAndDelete(req.params.id);
+  console.log(booking, "bkng");
+  const start_date = new LocalDate.parse(booking.startingDayOfStay);
+  const end_date = new LocalDate.parse(booking.endingDayOfStay);
+
+  const totalDays=days(
+    new Date(booking.startingDayOfStay),
+    JSJoda.ChronoUnit.DAYS.between(start_date, end_date) + 1
+  );
+  console.log(totalDays,"td");
+  for (let [key, value] of Object.entries(booking.roomDetails)) {
+    console.log(key,"ky")
+    const room = await Room.findById(key);
+    totalDays.map(day=>{
+      room.numberOfBookingsByDate[day]=room?.numberOfBookingsByDate[day]-value.numberOfRoomsBooked
+    })
+    room.bookingFullDates=_.difference(room.bookingFullDates,totalDays)
+    room.markModified("numberOfBookingsByDate", "bookingFullDates");
+    await room.save()
+  }
+
+  res.send("Successfully cancelled booking");
 });
 
 //? API post request request roomData for booking rooms

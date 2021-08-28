@@ -7,16 +7,18 @@ const auth = require("../../middleware/auth");
 const getDays = require("../../utils/getDays");
 const {Hotel} = require("../../models/hotel");
 const {Room} = require("../../models/room");
-const {Booking} = require("../../models/booking");
+const {Booking,validateBooking} = require("../../models/booking");
 const {Guest} = require("../../models/guest");
 const {retrieveMainPhotobyPath, retrieveMainPhoto} = require("../../utils/retrieveImages");
 const validateObjectId = require("../../middleware/validateObjectId");
 const {OfflineGuest} = require("../../models/offlineGuest");
+const convertBase64toImage = require("../../utils/convertBase64toImage");
+const createFolder = require("../../utils/createFolder");
+const validate = require("../../middleware/validate");
 
 router.get("/", [auth, receptionMiddleware], async (req, res) => {
   let finalData = [];
   let bookings;
-  console.log(req.query);
 
   if (req.query.isStayCompleted === "true") {
     bookings = await Booking.find({guestId: req.user._id, isStayCompleted: true}).lean();
@@ -65,7 +67,6 @@ router.get("/", [auth, receptionMiddleware], async (req, res) => {
   });
 
   function sendData() {
-    console.log("sending");
     res.send(finalData);
   }
 });
@@ -93,7 +94,12 @@ router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
   }
 
   newdate = year + "-" + month + "-" + day;
-  const bookings = await Booking.find().where("startingDayOfStay").eq(newdate).lean();
+  const bookings = await Booking.find()
+    .where("startingDayOfStay")
+    .eq(newdate)
+    .where("status")
+    .eq("yettostay")
+    .lean();
   if (!bookings[0]) return res.status(404).send("No bookings for today");
 
   let finalData = [];
@@ -111,7 +117,6 @@ router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
 
 router.get("/upcoming", [auth, receptionMiddleware], async (req, res) => {
   let {selectedDayRange} = req.query;
-  console.log(selectedDayRange, "sdr");
   let allTheDays;
   if (selectedDayRange) {
     selectedDayRange = JSON.parse(selectedDayRange);
@@ -150,7 +155,6 @@ router.get("/upcoming", [auth, receptionMiddleware], async (req, res) => {
     bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
     finalData.push(bookings[i]);
   }
-  console.log(finalData);
   res.send(finalData);
 });
 
@@ -174,7 +178,6 @@ router.get("/staying", [auth, receptionMiddleware], async (req, res) => {
 
 router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
   const booking = await Booking.findById(req.params.id).lean();
-  // console.log(booking.roomDetails);
   for (let [key, value] of Object.entries(booking.roomDetails)) {
     const room = await Room.findById(key);
     _.assign(value, _.pick(room, ["roomType", "availableRoomNumbers"]));
@@ -188,30 +191,86 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
       value["pricePerExtraBed"] = hotel.pricePerExtraBed;
       value["noOfExtraBeds"] = hotel.noOfExtraBeds;
     }
-    // console.log(value,"vl")
   }
   let guest;
   guest = await Guest.findById(booking.guestId);
   if (!guest) guest = await OfflineGuest.findById(booking.guestId);
   _.assign(booking, _.pick(guest, ["name", "phoneNumber", "email"]));
-  let roomFinalDetails={}
-  for(let [key,value] of Object.entries(booking.roomDetails)){
-    _.range(value.numberOfRoomsBooked).map((room,index)=>{
-      value["roomNumber"]=12
-      let tempObject={}
-      tempObject[key+index]=value
-      _.assign(roomFinalDetails,tempObject)
-    })
+  let roomFinalDetails = [];
+  for (let [key, value] of Object.entries(booking.roomDetails)) {
+    _.range(value.numberOfRoomsBooked).map((room, index) => {
+      value["roomNumber"] = "Select Room Number";
+      value["selectedExtraBed"] = 0;
+      // value["adults"]=0
+      // value["children"]=0
+      // let tempObject={}
+      value["roomId"] = key;
+      // tempObject[key+index]=value
+      roomFinalDetails.push(value);
+    });
   }
-  booking["roomFinalDetails"]=roomFinalDetails
-  // console.log(value)
-  console.log(booking)
+  booking["roomFinalDetails"] = roomFinalDetails;
+  booking["identityProof"] = "";
+  booking["identityProofNumber"] = "";
+  booking["address"] = "";
+  booking["phoneNumber"] = booking["phoneNumber"]||"";
   res.send(booking);
+});
+
+router.post("/checkin", [auth, receptionMiddleware,validate(validateBooking)], async (req, res) => {
+  createFolder(req.user.email);
+
+  req.body.identityProof = await convertBase64toImage(req.user.email, req.body.identityProof);
+  for (let data of req.body.roomFinalDetails) {
+    await Room.findByIdAndUpdate(data.roomId, {
+      $pull: {availableRoomNumbers: {$in: [data.roomNumber]}},
+    });
+  }
+  let checkinRoomDetails=[]
+  req.body.roomFinalDetails.map(details=>checkinRoomDetails.push(_.pick(details,["roomNumber","selectedExtraBed","adults","children"])))
+
+  const booking=await Booking.findByIdAndUpdate(req.body._id, {
+    $set: {
+      status: "checkedin",
+      roomFinalDetails: checkinRoomDetails,
+      identityProof: req.body.identityProof,
+      identityProofNumber: req.body.identityProofNumber,
+    },
+  });
+
+  guest = await Guest.findById(booking.guestId);
+  if (!guest) guest = await OfflineGuest.findById(booking.guestId);
+
+  guest["phoneNumber"]=req.body.phoneNumber
+  guest["address"]=req.body.address
+  await guest.save()
+  res.send("done");
+});
+
+router.get("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
+  const booking = await Booking.findById(req.params.id);
+
+  let price = 0;
+  for (data of booking.roomFinalDetails) {
+    price += data.pricePerRoom;
+    if (data.selectedExtraBed > 0) {
+      price += data.pricePerExtraBed;
+    }
+  }
+
+  let guest = await Guest.findById(booking.guestId).lean();
+  if (!guest) guest = await OfflineGuest.findById(booking.guestId).lean();
+  guest["price"] = price;
+  res.send(guest);
+});
+
+router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
+  await Booking.findByIdAndUpdate(req.params.id, {$set: {status: "checkedout"}});
+  res.send("done");
 });
 
 router.get("/completed", [auth, receptionMiddleware], async (req, res) => {
   let {selectedDayRange} = req.query;
-  console.log(selectedDayRange, "sdr");
   let allTheDays;
   if (selectedDayRange) {
     selectedDayRange = JSON.parse(selectedDayRange);
@@ -263,7 +322,6 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
       return res.status(404).send("Invalid room Id");
   }
 
-  console.log(selectedDayRange, "sdr");
   const allTheDays = getDays(selectedDayRange);
   const roomsDetails = {};
   // let totalPrice = 0;
@@ -299,9 +357,7 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
 
     roomDB.markModified("numberOfBookingsByDate", "bookingFullDates");
     await roomDB.save();
-    console.log(roomDB);
   }
-  console.log(allTheDays, "ad");
   const roomData = {};
   roomData["guestId"] = offlineGuestId;
   roomData["hotelId"] = hotelId;

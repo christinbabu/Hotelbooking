@@ -22,6 +22,10 @@ const offlineGuestSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
+  address: {
+    type: String,
+    default:null
+  },
   phoneNumber: {
     type: String,
     minlength: 5,
