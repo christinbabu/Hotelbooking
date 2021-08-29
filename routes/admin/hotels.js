@@ -26,7 +26,7 @@ router.get("/", [auth, adminMiddleware], async (req, res) => {
     _id: {
       $in: hotels,
     },
-  }).select({_id: 1, hotelName: 1, mainPhoto: 1, city: 1, startingRatePerDay: 1,receptionId:1})
+  }).select({_id: 1, hotelName: 1, mainPhoto: 1, city: 1, startingRatePerDay: 1,receptionId:1,restaurantId:1})
     .skip(pageNumber * pageSize)
     .limit(pageSize);
 

@@ -149,6 +149,10 @@ const hotelSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     default: null,
   },
+  restaurantId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null,
+  },
 });
 
 const Hotel = mongoose.model("hotel", hotelSchema);

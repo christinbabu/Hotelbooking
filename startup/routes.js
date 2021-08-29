@@ -27,6 +27,12 @@ const rooms = require("../routes/admin/rooms");
 const receptionChangePassword = require("../routes/reception/changePassword");
 const offlineSignup = require("../routes/reception/offlineSignup")
 
+const restaurantSignin = require("../routes/restaurant/signin");
+const restaurantSignup = require("../routes/restaurant/signup");
+const restaurantForgot = require("../routes/restaurant/forgot");
+const restaurantDetails = require("../routes/restaurant/bookings");
+const restaurantChangePassword = require("../routes/restaurant/changePassword");
+
 module.exports = function (app) {
   app.use(express.json({limit: '50mb'}));
   app.use("/api/admin/signin", adminSignin);
@@ -56,4 +62,10 @@ module.exports = function (app) {
   app.use("/api/reception/hotel", hotels);
   app.use("/api/reception/room", rooms);
   app.use("/api/reception/changePassword", receptionChangePassword);
+
+  app.use("/api/restaurant/signin", restaurantSignin);
+  app.use("/api/restaurant/signup", restaurantSignup);
+  app.use("/api/restaurant/forgot", restaurantForgot);
+  app.use("/api/restaurant/booking", restaurantDetails);
+  app.use("/api/restaurant/changePassword", restaurantChangePassword);
 };

@@ -188,37 +188,37 @@ router.get("/", async (req, res) => {
 
   //     roomIds=await Hotel.find().where("_id").in(hotelIds).distinct("hotelRooms")
 
-  //     let roomsQuery = Room.find().where("_id").in(roomIds)
+    //   let roomsQuery = Room.find().where("_id").in(roomIds)
 
-  //     if (filteredRoomFacilities.length > 0) {
-  //       roomsQuery = roomsQuery
-  //         .where("facilities")
-  //         .all(filteredRoomFacilities)
-  //         .in(filteredRoomFacilities);
-  //     }
+    //   if (filteredRoomFacilities.length > 0) {
+    //     roomsQuery = roomsQuery
+    //       .where("facilities")
+    //       .all(filteredRoomFacilities)
+    //       .in(filteredRoomFacilities);
+    //   }
 
-  //   hotelIds = await roomsQuery.find().distinct("hotelId")
+    // hotelIds = await roomsQuery.find().distinct("hotelId")
 
-  //   function getQuery() {
-  //     let hotelsQuery = Hotel.find()
-  //       .where("_id")
-  //       .in(hotelIds)
-  //       .where("provideDormitoryForDriver")
-  //       .in(provideDormitoryForDriver)
-  //       .where("accomodateChildren")
-  //       .in(accomodateChildren)
-  //       .where("starRating")
-  //       .in(filteredStarRating)
-  //       .where("reviewScore")
-  //       .gte(filteredRating)
-  //       .where("breakfast")
-  //       .in(breakfast)
-  //       .where("allowPets")
-  //       .in(allowPets)
-  //       .where("extraBed")
-  //       .in(extraBed)
-  //       .where("parking")
-  //       .in(parking);
+    // function getQuery() {
+    //   let hotelsQuery = Hotel.find()
+    //     .where("_id")
+    //     .in(hotelIds)
+    //     .where("provideDormitoryForDriver")
+    //     .in(provideDormitoryForDriver)
+    //     .where("accomodateChildren")
+    //     .in(accomodateChildren)
+    //     .where("starRating")
+    //     .in(filteredStarRating)
+    //     .where("reviewScore")
+    //     .gte(filteredRating)
+    //     .where("breakfast")
+    //     .in(breakfast)
+    //     .where("allowPets")
+    //     .in(allowPets)
+    //     .where("extraBed")
+    //     .in(extraBed)
+    //     .where("parking")
+    //     .in(parking);
 
   //     if (filteredHotelFacilities.length > 0)
   //       return hotelsQuery
