@@ -35,6 +35,10 @@ const restaurantSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
+  items:{
+    type:Array,
+    default:null
+  }
 });
 
 restaurantSchema.methods.generateAuthToken = function () {

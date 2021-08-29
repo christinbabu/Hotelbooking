@@ -35,6 +35,10 @@ const bookingSchema = new mongoose.Schema({
     type: Object,
     required: true,
   },
+  restaurantBill:{
+    type:Array,
+    default:null
+  },
   roomFinalDetails: {
     type: Array,
     default: null,
