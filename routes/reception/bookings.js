@@ -249,23 +249,35 @@ router.post("/checkin", [auth, receptionMiddleware,validate(validateBooking)], a
 
 router.get("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   const booking = await Booking.findById(req.params.id);
-
+  if(booking.status!=="checkedin") return res.status(400).send("Something went wrong")
+  let hotel=await Hotel.findById(booking.hotelId)
   let price = 0;
-  for (data of booking.roomFinalDetails) {
-    price += data.pricePerRoom;
-    if (data.selectedExtraBed > 0) {
-      price += data.pricePerExtraBed;
-    }
+  let accomodationTotal=0
+  for (let data of booking.roomFinalDetails) {
+    const room=await Room.find().where("roomNumbers").in(data.roomNumber)
+    accomodationTotal+=room[0].basePricePerNight
+    accomodationTotal+=data.selectedExtraBed*hotel.pricePerExtraBed
   }
+
+  let restaurantBillAmount=0
+
+  booking.restaurantBill.map(item=>{
+    restaurantBillAmount+=item.itemPrice*item.itemQuantity
+  })
+
+  price+=restaurantBillAmount+accomodationTotal
 
   let guest = await Guest.findById(booking.guestId).lean();
   if (!guest) guest = await OfflineGuest.findById(booking.guestId).lean();
   guest["price"] = price;
+  guest["restaurantBillAmount"] =restaurantBillAmount
+  guest["accomodationTotal"] =accomodationTotal
   res.send(guest);
 });
 
 router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
-  await Booking.findByIdAndUpdate(req.params.id, {$set: {status: "checkedout"}});
+  console.log(req.body,"aa")
+  await Booking.findByIdAndUpdate(req.params.id, {$set: {status: "checkedout",additionalCharges:req.body.items}});
   res.send("done");
 });
 

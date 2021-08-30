@@ -43,6 +43,10 @@ const bookingSchema = new mongoose.Schema({
     type: Array,
     default: null,
   },
+  additionalCharges:{
+    type:Array,
+    default:null,
+  },
   bookedOn: {
     type: String,
     required: true,
