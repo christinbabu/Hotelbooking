@@ -7,6 +7,7 @@ const auth = require("../../middleware/auth");
 const getDays = require("../../utils/getDays");
 const {Hotel} = require("../../models/hotel");
 const {Room} = require("../../models/room");
+const {RoomBoy} = require("../../models/roomBoy");
 const {Booking,validateBooking} = require("../../models/booking");
 const {Guest} = require("../../models/guest");
 const {retrieveMainPhotobyPath, retrieveMainPhoto} = require("../../utils/retrieveImages");
@@ -192,6 +193,10 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
       value["noOfExtraBeds"] = hotel.noOfExtraBeds;
     }
   }
+
+  const roomBoys = await RoomBoy.find({currentHotelId:booking.hotelId}).select({name:1})
+  console.log(roomBoys,"rbs")
+
   let guest;
   guest = await Guest.findById(booking.guestId);
   if (!guest) guest = await OfflineGuest.findById(booking.guestId);
@@ -200,6 +205,7 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
   for (let [key, value] of Object.entries(booking.roomDetails)) {
     _.range(value.numberOfRoomsBooked).map((room, index) => {
       value["roomNumber"] = "Select Room Number";
+      value["roomBoy"] = "Select Room Boy";
       value["selectedExtraBed"] = 0;
       // value["adults"]=0
       // value["children"]=0
@@ -214,6 +220,7 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
   booking["identityProofNumber"] = "";
   booking["address"] = "";
   booking["phoneNumber"] = booking["phoneNumber"]||"";
+  booking["roomBoys"]=roomBoys
   res.send(booking);
 });
 
@@ -225,9 +232,12 @@ router.post("/checkin", [auth, receptionMiddleware,validate(validateBooking)], a
     await Room.findByIdAndUpdate(data.roomId, {
       $pull: {availableRoomNumbers: {$in: [data.roomNumber]}},
     });
+
+    // await RoomBoy.findByIdAndUpdate(data.roomBoyId,{$push:{}})
+
   }
   let checkinRoomDetails=[]
-  req.body.roomFinalDetails.map(details=>checkinRoomDetails.push(_.pick(details,["roomNumber","selectedExtraBed","adults","children"])))
+  req.body.roomFinalDetails.map(details=>checkinRoomDetails.push(_.pick(details,["roomNumber","selectedExtraBed","adults","children","roomBoyId"])))
 
   const booking=await Booking.findByIdAndUpdate(req.body._id, {
     $set: {
@@ -241,9 +251,13 @@ router.post("/checkin", [auth, receptionMiddleware,validate(validateBooking)], a
   guest = await Guest.findById(booking.guestId);
   if (!guest) guest = await OfflineGuest.findById(booking.guestId);
 
+  
   guest["phoneNumber"]=req.body.phoneNumber
   guest["address"]=req.body.address
   await guest.save()
+
+
+
   res.send("done");
 });
 

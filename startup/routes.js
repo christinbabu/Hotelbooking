@@ -6,6 +6,7 @@ const adminForgot = require("../routes/admin/forgot");
 const verify = require("../routes/admin/verify");
 const adminChangePassword = require("../routes/admin/changePassword");
 const hotel=require("../routes/admin/hotels");
+const roomBoy=require("../routes/admin/roomBoy");
 
 const guestSignin = require("../routes/guest/signin");
 const guestSignup = require("../routes/guest/signup");
@@ -41,6 +42,7 @@ module.exports = function (app) {
   app.use("/api/admin/verify", verify);
   app.use("/api/admin/hotel", hotel);
   app.use("/api/admin/room", rooms);
+  app.use("/api/admin/roomBoy", roomBoy);
   app.use("/api/admin/changePassword", adminChangePassword);
 
   app.use("/api/guest/signin", guestSignin);
