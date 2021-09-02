@@ -39,10 +39,6 @@ const roomBoySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  currentHotel:{
-    type:String,
-    default:null
-  },
   currentHotelId:{
     type:mongoose.Schema.Types.ObjectId,
     required:true

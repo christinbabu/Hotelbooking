@@ -86,15 +86,22 @@ router.get("/guest", [auth, receptionMiddleware], async (req, res) => {
 
 router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
   var dateObj = new Date();
+  let date = dateObj.getUTCDate();
   let month = dateObj.getUTCMonth() + 1; //months from 1-12
-  let day = dateObj.getUTCDate();
   let year = dateObj.getUTCFullYear();
+
+  date = date.toString();
+  if (date.length == 1) {
+    date = "0" + date;
+  }
+
   month = month.toString();
   if (month.length == 1) {
     month = "0" + month;
   }
 
-  newdate = year + "-" + month + "-" + day;
+  newdate = year + "-" + month + "-" + date;
+  console.log(newdate);
   const bookings = await Booking.find()
     .where("startingDayOfStay")
     .eq(newdate)
@@ -126,14 +133,19 @@ router.get("/upcoming", [auth, receptionMiddleware], async (req, res) => {
 
   var dateObj = new Date();
   let month = dateObj.getUTCMonth() + 1; //months from 1-12
-  let day = dateObj.getUTCDate();
+  let date = dateObj.getUTCDate();
   let year = dateObj.getUTCFullYear();
   month = month.toString();
   if (month.length == 1) {
     month = "0" + month;
   }
 
-  newdate = year + "-" + month + "-" + day;
+  date = date.toString();
+  if (date.length == 1) {
+    date = "0" + date;
+  }
+
+  newdate = year + "-" + month + "-" + date;
   let bookings;
   if (selectedDayRange?.from) {
     bookings = await Booking.find()
@@ -305,14 +317,19 @@ router.get("/completed", [auth, receptionMiddleware], async (req, res) => {
 
   var dateObj = new Date();
   let month = dateObj.getUTCMonth() + 1; //months from 1-12
-  let day = dateObj.getUTCDate();
+  let date = dateObj.getUTCDate();
   let year = dateObj.getUTCFullYear();
   month = month.toString();
   if (month.length == 1) {
     month = "0" + month;
   }
 
-  newdate = year + "-" + month + "-" + day;
+  date = date.toString();
+  if (date.length == 1) {
+    date = "0" + date;
+  }
+
+  newdate = year + "-" + month + "-" + date;
   let bookings;
   if (selectedDayRange?.from) {
     bookings = await Booking.find()

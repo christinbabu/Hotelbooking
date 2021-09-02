@@ -70,7 +70,7 @@ const hotelSchema = new mongoose.Schema({
   },
   pricePerExtraBed: {
     type: Number,
-    min: 5,
+    min: 0,
     max: 10000,
     default: null,
   },
@@ -176,7 +176,7 @@ function validateHotel(data) {
     facilities: Yup.array(),
     extraBed: Yup.boolean().required(),
     noOfExtraBeds: Yup.number().min(1).max(4),
-    pricePerExtraBed: Yup.number().min(5).max(10000),
+    pricePerExtraBed: Yup.number().min(0).max(10000).nullable(),
     mainPhoto: Yup.mixed().required(),
     photos: Yup.array().nullable(),
     freeCancellationAvailable: Yup.string().required(),
