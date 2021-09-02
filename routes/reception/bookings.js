@@ -102,7 +102,7 @@ router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
 
   newdate = year + "-" + month + "-" + date;
   console.log(newdate);
-  const bookings = await Booking.find()
+  const bookings = await Booking.find().where("hotelId").in(req.user.hotelId)
     .where("startingDayOfStay")
     .eq(newdate)
     .where("status")
@@ -190,9 +190,14 @@ router.get("/staying", [auth, receptionMiddleware], async (req, res) => {
 });
 
 router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
+  //bugfix
   const booking = await Booking.findById(req.params.id).lean();
+  console.log('test',req.params.id);
+  let extraBed
   for (let [key, value] of Object.entries(booking.roomDetails)) {
     const room = await Room.findById(key);
+
+    console.log(room,"rm")
     _.assign(value, _.pick(room, ["roomType", "availableRoomNumbers"]));
     const hotel = await Hotel.findById(room.hotelId).select({
       extraBed: 1,
@@ -203,6 +208,8 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
     if (hotel.extraBed) {
       value["pricePerExtraBed"] = hotel.pricePerExtraBed;
       value["noOfExtraBeds"] = hotel.noOfExtraBeds;
+      console.log(hotel.extraBed,"he");
+      extraBed=hotel.extraBed
     }
   }
 
@@ -233,6 +240,8 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
   booking["address"] = "";
   booking["phoneNumber"] = booking["phoneNumber"]||"";
   booking["roomBoys"]=roomBoys
+  booking["extraBed"]=extraBed
+  console.log(booking,"vv")
   res.send(booking);
 });
 

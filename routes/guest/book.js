@@ -15,10 +15,11 @@ const days = require("days-in-a-row");
 const JSJoda = require("js-joda");
 
 router.get("/", async (req, res) => {
-  let {placeForSearch, selectedDayRange, pageNumber, pageSize, filterOptions} = req.query;
+  let {placeForSearch, selectedDayRange, pageNumber, pageSize, filterOptions, hotelId} = req.query;
   pageNumber = Number(pageNumber);
   pageSize = Number(pageSize);
   console.log(placeForSearch, "ps");
+  console.log(selectedDayRange, "ps");
   // placeForSearch = placeForSearch.toLowerCase();
   let allTheDays;
   selectedDayRange = JSON.parse(selectedDayRange);
@@ -28,7 +29,9 @@ router.get("/", async (req, res) => {
   }
 
   let hotel = [await Hotel.findOne({city: placeForSearch})];
+  if (!hotel[0]) hotel = [await Hotel.findById(hotelId)];
   if (!hotel[0]) return res.status(404).send("hotel with given id not found");
+
   hotel = await retrieveMainPhoto(hotel);
   hotel = await retrieveOtherPhotos(hotel);
   let data = {hotels: hotel, numberOfDays: allTheDays?.length};
@@ -188,37 +191,37 @@ router.get("/", async (req, res) => {
 
   //     roomIds=await Hotel.find().where("_id").in(hotelIds).distinct("hotelRooms")
 
-    //   let roomsQuery = Room.find().where("_id").in(roomIds)
+  //   let roomsQuery = Room.find().where("_id").in(roomIds)
 
-    //   if (filteredRoomFacilities.length > 0) {
-    //     roomsQuery = roomsQuery
-    //       .where("facilities")
-    //       .all(filteredRoomFacilities)
-    //       .in(filteredRoomFacilities);
-    //   }
+  //   if (filteredRoomFacilities.length > 0) {
+  //     roomsQuery = roomsQuery
+  //       .where("facilities")
+  //       .all(filteredRoomFacilities)
+  //       .in(filteredRoomFacilities);
+  //   }
 
-    // hotelIds = await roomsQuery.find().distinct("hotelId")
+  // hotelIds = await roomsQuery.find().distinct("hotelId")
 
-    // function getQuery() {
-    //   let hotelsQuery = Hotel.find()
-    //     .where("_id")
-    //     .in(hotelIds)
-    //     .where("provideDormitoryForDriver")
-    //     .in(provideDormitoryForDriver)
-    //     .where("accomodateChildren")
-    //     .in(accomodateChildren)
-    //     .where("starRating")
-    //     .in(filteredStarRating)
-    //     .where("reviewScore")
-    //     .gte(filteredRating)
-    //     .where("breakfast")
-    //     .in(breakfast)
-    //     .where("allowPets")
-    //     .in(allowPets)
-    //     .where("extraBed")
-    //     .in(extraBed)
-    //     .where("parking")
-    //     .in(parking);
+  // function getQuery() {
+  //   let hotelsQuery = Hotel.find()
+  //     .where("_id")
+  //     .in(hotelIds)
+  //     .where("provideDormitoryForDriver")
+  //     .in(provideDormitoryForDriver)
+  //     .where("accomodateChildren")
+  //     .in(accomodateChildren)
+  //     .where("starRating")
+  //     .in(filteredStarRating)
+  //     .where("reviewScore")
+  //     .gte(filteredRating)
+  //     .where("breakfast")
+  //     .in(breakfast)
+  //     .where("allowPets")
+  //     .in(allowPets)
+  //     .where("extraBed")
+  //     .in(extraBed)
+  //     .where("parking")
+  //     .in(parking);
 
   //     if (filteredHotelFacilities.length > 0)
   //       return hotelsQuery
@@ -346,20 +349,21 @@ router.delete("/:id", async (req, res) => {
   const start_date = new LocalDate.parse(booking.startingDayOfStay);
   const end_date = new LocalDate.parse(booking.endingDayOfStay);
 
-  const totalDays=days(
+  const totalDays = days(
     new Date(booking.startingDayOfStay),
     JSJoda.ChronoUnit.DAYS.between(start_date, end_date) + 1
   );
-  console.log(totalDays,"td");
+  console.log(totalDays, "td");
   for (let [key, value] of Object.entries(booking.roomDetails)) {
-    console.log(key,"ky")
+    console.log(key, "ky");
     const room = await Room.findById(key);
-    totalDays.map(day=>{
-      room.numberOfBookingsByDate[day]=room?.numberOfBookingsByDate[day]-value.numberOfRoomsBooked
-    })
-    room.bookingFullDates=_.difference(room.bookingFullDates,totalDays)
+    totalDays.map(day => {
+      room.numberOfBookingsByDate[day] =
+        room?.numberOfBookingsByDate[day] - value.numberOfRoomsBooked;
+    });
+    room.bookingFullDates = _.difference(room.bookingFullDates, totalDays);
     room.markModified("numberOfBookingsByDate", "bookingFullDates");
-    await room.save()
+    await room.save();
   }
 
   res.send("Successfully cancelled booking");

@@ -15,7 +15,10 @@ const convertBase64toImage = require("../../utils/convertBase64toImage");
 const removeImage = require("../../utils/deleteFolder");
 
 router.get("/", [auth, adminMiddleware], async (req, res) => {
-  const roomBoys = await RoomBoy.find();
+  console.log(req.query.hotelId,"hid")
+  const roomBoys = await RoomBoy.find({currentHotelId:req.query.hotelId});
+  if(!roomBoys) return res.status(404).send("No room boys found")
+  console.log(roomBoys)
   res.send(roomBoys);
 });
 
