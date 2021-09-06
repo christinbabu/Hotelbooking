@@ -11,15 +11,16 @@ const {Booking} = require("../../models/booking");
 const {Guest} = require("../../models/guest");
 const {retrieveMainPhotobyPath, retrieveMainPhoto} = require("../../utils/retrieveImages");
 const validateObjectId = require("../../middleware/validateObjectId");
+const getCheckoutDate = require("../../utils/getCheckoutDate");
 
 router.get("/", [auth, guestMiddleware], async (req, res) => {
   let finalData = [];
   let bookings
   console.log(req.query)
   if(req.query.isStayCompleted==="true"){
-    bookings = await Booking.find({guestId: req.user._id, isStayCompleted: true}).lean();
+    bookings = await Booking.find({guestId: req.user._id, status: "checkedout"}).lean();
   }else{
-    bookings = await Booking.find({guestId: req.user._id, isStayCompleted: false}).lean();
+    bookings = await Booking.find({guestId: req.user._id}).where("status").ne("checkedout").lean();
   }
 
   _.each(bookings, async (booking, index) => {
@@ -52,10 +53,14 @@ router.get("/", [auth, guestMiddleware], async (req, res) => {
       "en-us",
       {day: "numeric", month: "long", year: "numeric"}
     );
-    bookings[index].endingDayOfStay = new Date(bookings[index].endingDayOfStay).toLocaleString(
+    bookings[index].endingDayOfStay=new Date(getCheckoutDate(bookings[index].endingDayOfStay)).toLocaleString(
       "en-us",
       {day: "numeric", month: "long", year: "numeric"}
     );
+    // bookings[index].endingDayOfStay = new Date(bookings[index].endingDayOfStay).toLocaleString(
+    //   "en-us",
+    //   {day: "numeric", month: "long", year: "numeric"}
+    // );
     finalData.push(bookings[index]);
     if (index == bookings.length - 1) {
       sendData();

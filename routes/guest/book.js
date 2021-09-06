@@ -320,6 +320,9 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
     await roomDB.save();
     console.log(roomDB);
   }
+
+  const bookingsCount=await Booking.find().count()
+
   console.log(allTheDays, "ad");
   const roomData = {};
   roomData["guestId"] = req.user._id;
@@ -333,12 +336,13 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
   roomData["endingDayOfStay"] = allTheDays[allTheDays.length - 1];
   roomData["roomDetails"] = roomsDetails;
   roomData["bookingMode"] = "online";
+  roomData["hotelBookingId"]=""+Math.floor(Math.random() * (99 - 10 + 1) + 10)+bookingsCount
   // roomData["totalPrice"] = totalPrice;
 
-  const booking = new Booking(roomData);
-  await booking.save();
+  const newBooking = new Booking(roomData);
+  await newBooking.save();
 
-  await Guest.findByIdAndUpdate(req.user._id, {$push: {bookedHotelDetails: booking._id}});
+  await Guest.findByIdAndUpdate(req.user._id, {$push: {bookedHotelDetails: newBooking._id}});
   res.send("Successfully booked");
 });
 
@@ -391,3 +395,15 @@ router.delete("/:id", async (req, res) => {
 // }
 
 module.exports = router;
+
+
+
+// let apikey="M4rze2ErDeeNfmdKAaio3rmPHzJY7IChArWRfjeQGgjVeJyTkrctE8IHTG4V"
+
+// var fast2sms = require('fast-two-sms');
+// var options = {API_KEY:apikey};
+// fast2sms.sendMessage({ authorization : apikey,message: 'Testing hotel book', numbers : ['8137833845'],sender_id:"sashi" }).then(function (data) {
+//     console.log('data................', data);
+// }).catch(function (error) {
+//     console.log('err.................', error);
+// })

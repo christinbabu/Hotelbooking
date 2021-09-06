@@ -15,6 +15,12 @@ const roomBoySchema = new mongoose.Schema({
     minlength: 8,
     maxlength: 255,
   },
+  city:{
+    type:String,
+    required:true,
+    min:1,
+    max:50
+  },
   phoneNumber: {
     type: String,
     validate: {
@@ -55,6 +61,7 @@ function validateRoomBoy(data) {
       .length(12)
       .matches(/^[0-9]+$/, "Mobile number must include only numbers").label("Mobile Number"),
     address: Yup.string().required().min(8).max(255),
+    city: Yup.string().required().min(1).max(50),
     aadharNumber: Yup.string()
       .required()
       .length(12)

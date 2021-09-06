@@ -9,6 +9,7 @@ const mailService = require("../../services/mailService");
 const {encrypt, decrypt} = require("../../utils/encryption");
 
 router.post("/", async (req, res) => {
+  console.log("here")
   let {userId} = req.body;
   let guest = await findGuest(userId);
   if (!guest)
@@ -45,7 +46,7 @@ router.put("/:token", validate(validateGuestPassword), async (req, res) => {
   if (token !== decryptedResetToken) return res.status(400).send("Something went wrong. Try again");
 
   const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(req.body.password, salt);
+  const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
 
   guest.password = hashedPassword;
   guest.resettoken = null;

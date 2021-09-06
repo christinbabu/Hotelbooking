@@ -16,6 +16,7 @@ const {OfflineGuest} = require("../../models/offlineGuest");
 const convertBase64toImage = require("../../utils/convertBase64toImage");
 const createFolder = require("../../utils/createFolder");
 const validate = require("../../middleware/validate");
+const getCheckoutDate = require("../../utils/getCheckoutDate");
 
 router.get("/", [auth, receptionMiddleware], async (req, res) => {
   let finalData = [];
@@ -115,6 +116,7 @@ router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
   for (i = 0; i < bookings.length; i++) {
     let guest = await Guest.findById(bookings[i].guestId);
     if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
+    bookings[i]["endingDayOfStay"]=getCheckoutDate(bookings[i]["endingDayOfStay"])
     bookings[i]["name"] = guest.name;
     bookings[i]["email"] = guest.email;
     bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
@@ -163,6 +165,7 @@ router.get("/upcoming", [auth, receptionMiddleware], async (req, res) => {
   for (i = 0; i < bookings.length; i++) {
     let guest = await Guest.findById(bookings[i].guestId);
     if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
+    bookings[i]["endingDayOfStay"]=getCheckoutDate(bookings[i]["endingDayOfStay"])
     bookings[i]["name"] = guest.name;
     bookings[i]["email"] = guest.email;
     bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
@@ -181,6 +184,7 @@ router.get("/staying", [auth, receptionMiddleware], async (req, res) => {
   for (i = 0; i < bookings.length; i++) {
     let guest = await Guest.findById(bookings[i].guestId);
     if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
+    bookings[i]["endingDayOfStay"]=getCheckoutDate(bookings[i]["endingDayOfStay"])
     bookings[i]["name"] = guest.name;
     bookings[i]["email"] = guest.email;
     bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
@@ -241,6 +245,7 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
   booking["phoneNumber"] = booking["phoneNumber"]||"";
   booking["roomBoys"]=roomBoys
   booking["extraBed"]=extraBed
+  booking["endingDayOfStay"]=getCheckoutDate(booking["endingDayOfStay"])
   console.log(booking,"vv")
   res.send(booking);
 });
@@ -410,6 +415,9 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
     roomDB.markModified("numberOfBookingsByDate", "bookingFullDates");
     await roomDB.save();
   }
+
+  const bookingsCount=await Booking.find().count()
+
   const roomData = {};
   roomData["guestId"] = offlineGuestId;
   roomData["hotelId"] = hotelId;
@@ -422,6 +430,7 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
   roomData["endingDayOfStay"] = allTheDays[allTheDays.length - 1];
   roomData["roomDetails"] = roomsDetails;
   roomData["bookingMode"] = "offline";
+  roomData["hotelBookingId"]=""+Math.floor(Math.random() * (99 - 10 + 1) + 10)+bookingsCount
   // roomData["totalPrice"] = totalPrice;
 
   const booking = new Booking(roomData);

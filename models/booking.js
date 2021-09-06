@@ -62,6 +62,10 @@ const bookingSchema = new mongoose.Schema({
   bookingMode: {
     type: String,
   },
+  hotelBookingId:{
+    type:String,
+    required: true,
+  },
   status: {
     type: String,
     default: "yettostay",
