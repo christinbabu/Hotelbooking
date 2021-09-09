@@ -17,6 +17,12 @@ const convertBase64toImage = require("../../utils/convertBase64toImage");
 const createFolder = require("../../utils/createFolder");
 const validate = require("../../middleware/validate");
 const getCheckoutDate = require("../../utils/getCheckoutDate");
+const bookedMail = require("../../services/bookedMail");
+const bookedMessage = require("../../services/bookedMessage");
+const checkinMail = require("../../services/checkinMail");
+const checkinMessage = require("../../services/checkinMessage");
+const checkoutMail = require("../../services/checkoutMail");
+const checkoutMessage = require("../../services/checkoutMessage");
 
 router.get("/", [auth, receptionMiddleware], async (req, res) => {
   let finalData = [];
@@ -272,7 +278,7 @@ router.post("/checkin", [auth, receptionMiddleware,validate(validateBooking)], a
       identityProof: req.body.identityProof,
       identityProofNumber: req.body.identityProofNumber,
     },
-  });
+  },{new:true});
 
   guest = await Guest.findById(booking.guestId);
   if (!guest) guest = await OfflineGuest.findById(booking.guestId);
@@ -280,8 +286,15 @@ router.post("/checkin", [auth, receptionMiddleware,validate(validateBooking)], a
   
   guest["phoneNumber"]=req.body.phoneNumber
   guest["address"]=req.body.address
-  await guest.save()
-
+  guest.save().then(()=>{
+    if(guest.email){
+      checkinMail(guest.email,booking)
+    }
+  
+    if(guest.phoneNumber){
+      checkinMessage(booking,guest.phoneNumber)
+    }
+  })
 
 
   res.send("done");
@@ -317,7 +330,16 @@ router.get("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
 
 router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   console.log(req.body,"aa")
-  await Booking.findByIdAndUpdate(req.params.id, {$set: {status: "checkedout",additionalCharges:req.body.items}});
+  const booking=await Booking.findByIdAndUpdate(req.params.id, {$set: {status: "checkedout",additionalCharges:req.body.items}},{new: true});
+
+  let guest = await Guest.findById(booking.guestId).lean();
+  if (!guest) guest = await OfflineGuest.findById(booking.guestId).lean();
+  if(guest.email){
+    await checkoutMail(guest.email,booking)
+  }
+  if(guest.phoneNumber){
+    await checkoutMessage(booking,guest.phoneNumber)
+  }
   res.send("done");
 });
 
@@ -436,7 +458,13 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
   const booking = new Booking(roomData);
   await booking.save();
 
-  await OfflineGuest.findByIdAndUpdate(offlineGuestId, {$push: {bookedHotelDetails: booking._id}});
+  const offlineGuestData=await OfflineGuest.findByIdAndUpdate(offlineGuestId, {$push: {bookedHotelDetails: booking._id}});
+  if(offlineGuestData.email){
+    await bookedMail(offlineGuestData.email,booking,offlineGuestData.name)
+  }
+  if(offlineGuestData.phoneNumber){
+    await bookedMessage(booking.hotelBookingId,offlineGuestData.phoneNumber)
+  }
   res.send("Successfully booked");
 });
 

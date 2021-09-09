@@ -11,7 +11,6 @@ const offlineGuestSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
     validate: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
   },
   bookedHotelDetails: {
@@ -28,6 +27,7 @@ const offlineGuestSchema = new mongoose.Schema({
   },
   phoneNumber: {
     type: String,
+    required:true,
     minlength: 5,
     maxlength: 50,
   },
@@ -63,9 +63,8 @@ const OfflineGuest = mongoose.model("offlineguest", offlineGuestSchema);
 function validateOfflineGuest(data) {
   const schema = Yup.object().shape({
     name: Yup.string().min(2).max(50).required("Name is required").label("Name"),
-    email: Yup.string().required("Email is required").email("Email must be valid").label("Email"),
-    phoneNumber: Yup.string().min(5).max(50)
-      .nullable(),
+    email: Yup.string().email("Email must be valid").nullable().label("Email"),
+    phoneNumber: Yup.string().required().min(5).max(50),
   });
   return schema.validate(data);
 }

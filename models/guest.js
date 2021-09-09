@@ -66,6 +66,7 @@ guestSchema.methods.generateAuthToken = function () {
       username: this.username,
       name:this.name,
       isGuest: true,
+      email:this.email
     },
     process.env.JWT_AUTH_PRIVATE_KEY
   );

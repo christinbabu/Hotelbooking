@@ -13,6 +13,7 @@ const {retrieveMainPhoto, retrieveOtherPhotos} = require("../../utils/retrieveIm
 const validateObjectId = require("../../middleware/validateObjectId");
 const days = require("days-in-a-row");
 const JSJoda = require("js-joda");
+const bookedMail = require("../../services/bookedMail");
 
 router.get("/", async (req, res) => {
   let {placeForSearch, selectedDayRange, pageNumber, pageSize, filterOptions, hotelId} = req.query;
@@ -282,7 +283,7 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
       return res.status(404).send("Invalid room Id");
   }
 
-  console.log(selectedDayRange, "sdr");
+  console.log(req, "sdr");
   const allTheDays = getDays(selectedDayRange);
   const roomsDetails = {};
   // let totalPrice = 0;
@@ -321,7 +322,7 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
     console.log(roomDB);
   }
 
-  const bookingsCount=await Booking.find().count()
+  const bookingsCount=await Booking.find().countDocuments()
 
   console.log(allTheDays, "ad");
   const roomData = {};
@@ -343,6 +344,7 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
   await newBooking.save();
 
   await Guest.findByIdAndUpdate(req.user._id, {$push: {bookedHotelDetails: newBooking._id}});
+  await bookedMail(req.user.email,newBooking,req.user.name)
   res.send("Successfully booked");
 });
 

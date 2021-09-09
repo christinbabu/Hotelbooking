@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const findReception = require("../../utils/findReception");
 const validate = require("../../middleware/validate");
 const {validateReceptionPassword} = require("../../models/reception");
-const mailService = require("../../services/mailService");
+const resetPasswordMail = require("../../services/resetPasswordMail");
 const {encrypt, decrypt} = require("../../utils/encryption");
 
 router.post("/", async (req, res) => {
@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
   let encryptedResetToken = encrypt(resetToken);
   reception.resettoken = encryptedResetToken;
   await reception.save();
-  mailService(reception["email"], resetToken, reception?.name);
+  resetPasswordMail(reception["email"], resetToken, reception?.name);
   console.log(resetToken);
   res.send("Link Sent Successfully");
 });
