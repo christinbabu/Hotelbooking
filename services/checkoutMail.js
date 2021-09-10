@@ -5,7 +5,6 @@ const getCheckoutDate = require("../utils/getCheckoutDate");
 let LocalDate=JSJoda.LocalDate
 
 module.exports = function (userEmail, booking, userName) {
-
     let guests=0
 
     booking.roomFinalDetails.map(data=>{
@@ -526,6 +525,59 @@ module.exports = function (userEmail, booking, userName) {
                                       "
                                       role="presentation"
                                     >
+                                    <tr style="border-collapse: collapse">
+                                      <td
+                                        align="center"
+                                        style="
+                                          margin: 0;
+                                          padding-left: 10px;
+                                          padding-right: 10px;
+                                          padding-top: 40px;
+                                          padding-bottom: 40px;
+                                        "
+                                      >
+                                        <span
+                                          class="es-button-border"
+                                          style="
+                                            border-style: solid;
+                                            border-color: #3d5ca3;
+                                            background: #ffffff;
+                                            border-width: 2px;
+                                            display: inline-block;
+                                            border-radius: 10px;
+                                            width: auto;
+                                          "
+                                          ><a
+                                            href="http://localhost:3000/linkreview/${booking.linkReviewId}"
+                                            class="es-button"
+                                            target="_blank"
+                                            style="
+                                              mso-style-priority: 100 !important;
+                                              text-decoration: none;
+                                              -webkit-text-size-adjust: none;
+                                              -ms-text-size-adjust: none;
+                                              mso-line-height-rule: exactly;
+                                              color: #3d5ca3;
+                                              font-size: 14px;
+                                              border-style: solid;
+                                              border-color: #ffffff;
+                                              border-width: 15px 20px 15px 20px;
+                                              display: inline-block;
+                                              background: #ffffff;
+                                              border-radius: 10px;
+                                              font-family: arial, 'helvetica neue', helvetica,
+                                                sans-serif;
+                                              font-weight: bold;
+                                              font-style: normal;
+                                              line-height: 17px;
+                                              width: auto;
+                                              text-align: center;
+                                            "
+                                            >Write a Review</a
+                                          ></span
+                                        >
+                                      </td>
+                                    </tr>
                                     </table>
                                     <br /><br />
                                   </td>

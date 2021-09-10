@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html
   xmlns="http://www.w3.org/1999/xhtml"
   xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -466,18 +466,59 @@
                                       "
                                       role="presentation"
                                     >
-                                      <tr style="border-collapse: collapse">
-                                        <td style="padding: 0; margin: 0">Pin Code:</td>
-                                        <td style="padding: 0; margin: 0; color: #0000cd">
-                                          <strong>323</strong>
-                                        </td>
-                                      </tr>
-                                      <tr style="border-collapse: collapse">
-                                        <td style="padding: 0; margin: 0">Confirmation Number:</td>
-                                        <td style="padding: 0; margin: 0; color: #0000cd">
-                                          <strong>1134523</strong>
-                                        </td>
-                                      </tr>
+                                    <tr style="border-collapse: collapse">
+                                      <td
+                                        align="center"
+                                        style="
+                                          margin: 0;
+                                          padding-left: 10px;
+                                          padding-right: 10px;
+                                          padding-top: 40px;
+                                          padding-bottom: 40px;
+                                        "
+                                      >
+                                        <span
+                                          class="es-button-border"
+                                          style="
+                                            border-style: solid;
+                                            border-color: #3d5ca3;
+                                            background: #ffffff;
+                                            border-width: 2px;
+                                            display: inline-block;
+                                            border-radius: 10px;
+                                            width: auto;
+                                          "
+                                          ><a
+                                            href="http://localhost:3000/resetpassword/${resetToken}"
+                                            class="es-button"
+                                            target="_blank"
+                                            style="
+                                              mso-style-priority: 100 !important;
+                                              text-decoration: none;
+                                              -webkit-text-size-adjust: none;
+                                              -ms-text-size-adjust: none;
+                                              mso-line-height-rule: exactly;
+                                              color: #3d5ca3;
+                                              font-size: 14px;
+                                              border-style: solid;
+                                              border-color: #ffffff;
+                                              border-width: 15px 20px 15px 20px;
+                                              display: inline-block;
+                                              background: #ffffff;
+                                              border-radius: 10px;
+                                              font-family: arial, 'helvetica neue', helvetica,
+                                                sans-serif;
+                                              font-weight: bold;
+                                              font-style: normal;
+                                              line-height: 17px;
+                                              width: auto;
+                                              text-align: center;
+                                            "
+                                            >RESET PASSWORD</a
+                                          ></span
+                                        >
+                                      </td>
+                                    </tr>
                                     </table>
                                     <br /><br />
                                   </td>
@@ -738,7 +779,7 @@
                                             line-height: 21px;
                                           "
                                         >
-                                          Oct 22, 2017
+                                          ${booking.startingDayOfStay}
                                         </td>
                                       </tr>
                                       <tr style="border-collapse: collapse">
@@ -760,7 +801,7 @@
                                             line-height: 21px;
                                           "
                                         >
-                                          Oct 23,2017
+                                          ${booking.endingDayOfStay}
                                         </td>
                                       </tr>
                                       <tr style="border-collapse: collapse">
@@ -772,7 +813,7 @@
                                             line-height: 21px;
                                           "
                                         >
-                                          Number of Night's
+                                          Number of Nights
                                         </td>
                                         <td
                                           style="
@@ -782,7 +823,7 @@
                                             line-height: 21px;
                                           "
                                         >
-                                          1
+                                          ${totalDays}
                                         </td>
                                       </tr>
                                       <tr style="border-collapse: collapse">
@@ -804,7 +845,7 @@
                                             line-height: 21px;
                                           "
                                         >
-                                          2
+                                          ${totalRooms}
                                         </td>
                                       </tr>
                                       <tr style="border-collapse: collapse">
@@ -816,7 +857,7 @@
                                             line-height: 21px;
                                           "
                                         >
-                                          Guest's:
+                                          Total Guests:
                                         </td>
                                         <td
                                           style="
@@ -826,7 +867,7 @@
                                             line-height: 21px;
                                           "
                                         >
-                                          4
+                                          ${guests}
                                         </td>
                                       </tr>
                                     </table>

@@ -8,7 +8,7 @@ const getDays = require("../../utils/getDays");
 const {Hotel} = require("../../models/hotel");
 const {Room} = require("../../models/room");
 const {RoomBoy} = require("../../models/roomBoy");
-const {Booking,validateBooking} = require("../../models/booking");
+const {Booking, validateBooking} = require("../../models/booking");
 const {Guest} = require("../../models/guest");
 const {retrieveMainPhotobyPath, retrieveMainPhoto} = require("../../utils/retrieveImages");
 const validateObjectId = require("../../middleware/validateObjectId");
@@ -109,7 +109,9 @@ router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
 
   newdate = year + "-" + month + "-" + date;
   console.log(newdate);
-  const bookings = await Booking.find().where("hotelId").in(req.user.hotelId)
+  const bookings = await Booking.find()
+    .where("hotelId")
+    .in(req.user.hotelId)
     .where("startingDayOfStay")
     .eq(newdate)
     .where("status")
@@ -122,7 +124,7 @@ router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
   for (i = 0; i < bookings.length; i++) {
     let guest = await Guest.findById(bookings[i].guestId);
     if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
-    bookings[i]["endingDayOfStay"]=getCheckoutDate(bookings[i]["endingDayOfStay"])
+    bookings[i]["endingDayOfStay"] = getCheckoutDate(bookings[i]["endingDayOfStay"]);
     bookings[i]["name"] = guest.name;
     bookings[i]["email"] = guest.email;
     bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
@@ -171,7 +173,7 @@ router.get("/upcoming", [auth, receptionMiddleware], async (req, res) => {
   for (i = 0; i < bookings.length; i++) {
     let guest = await Guest.findById(bookings[i].guestId);
     if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
-    bookings[i]["endingDayOfStay"]=getCheckoutDate(bookings[i]["endingDayOfStay"])
+    bookings[i]["endingDayOfStay"] = getCheckoutDate(bookings[i]["endingDayOfStay"]);
     bookings[i]["name"] = guest.name;
     bookings[i]["email"] = guest.email;
     bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
@@ -190,7 +192,7 @@ router.get("/staying", [auth, receptionMiddleware], async (req, res) => {
   for (i = 0; i < bookings.length; i++) {
     let guest = await Guest.findById(bookings[i].guestId);
     if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
-    bookings[i]["endingDayOfStay"]=getCheckoutDate(bookings[i]["endingDayOfStay"])
+    bookings[i]["endingDayOfStay"] = getCheckoutDate(bookings[i]["endingDayOfStay"]);
     bookings[i]["name"] = guest.name;
     bookings[i]["email"] = guest.email;
     bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
@@ -202,12 +204,12 @@ router.get("/staying", [auth, receptionMiddleware], async (req, res) => {
 router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
   //bugfix
   const booking = await Booking.findById(req.params.id).lean();
-  console.log('test',req.params.id);
-  let extraBed
+  console.log("test", req.params.id);
+  let extraBed;
   for (let [key, value] of Object.entries(booking.roomDetails)) {
     const room = await Room.findById(key);
 
-    console.log(room,"rm")
+    console.log(room, "rm");
     _.assign(value, _.pick(room, ["roomType", "availableRoomNumbers"]));
     const hotel = await Hotel.findById(room.hotelId).select({
       extraBed: 1,
@@ -218,13 +220,13 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
     if (hotel.extraBed) {
       value["pricePerExtraBed"] = hotel.pricePerExtraBed;
       value["noOfExtraBeds"] = hotel.noOfExtraBeds;
-      console.log(hotel.extraBed,"he");
-      extraBed=hotel.extraBed
+      console.log(hotel.extraBed, "he");
+      extraBed = hotel.extraBed;
     }
   }
 
-  const roomBoys = await RoomBoy.find({currentHotelId:booking.hotelId}).select({name:1})
-  console.log(roomBoys,"rbs")
+  const roomBoys = await RoomBoy.find({currentHotelId: booking.hotelId}).select({name: 1});
+  console.log(roomBoys, "rbs");
 
   let guest;
   guest = await Guest.findById(booking.guestId);
@@ -248,97 +250,129 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
   booking["identityProof"] = "";
   booking["identityProofNumber"] = "";
   booking["address"] = "";
-  booking["phoneNumber"] = booking["phoneNumber"]||"";
-  booking["roomBoys"]=roomBoys
-  booking["extraBed"]=extraBed
-  booking["endingDayOfStay"]=getCheckoutDate(booking["endingDayOfStay"])
-  console.log(booking,"vv")
+  booking["phoneNumber"] = booking["phoneNumber"] || "";
+  booking["roomBoys"] = roomBoys;
+  booking["extraBed"] = extraBed;
+  booking["endingDayOfStay"] = getCheckoutDate(booking["endingDayOfStay"]);
+  console.log(booking, "vv");
   res.send(booking);
 });
 
-router.post("/checkin", [auth, receptionMiddleware,validate(validateBooking)], async (req, res) => {
-  createFolder(req.user.email);
+router.post(
+  "/checkin",
+  [auth, receptionMiddleware, validate(validateBooking)],
+  async (req, res) => {
+    createFolder(req.user.email);
 
-  req.body.identityProof = await convertBase64toImage(req.user.email, req.body.identityProof);
-  for (let data of req.body.roomFinalDetails) {
-    await Room.findByIdAndUpdate(data.roomId, {
-      $pull: {availableRoomNumbers: {$in: [data.roomNumber]}},
+    req.body.identityProof = await convertBase64toImage(req.user.email, req.body.identityProof);
+    for (let data of req.body.roomFinalDetails) {
+      await Room.findByIdAndUpdate(data.roomId, {
+        $pull: {availableRoomNumbers: {$in: [data.roomNumber]}},
+      });
+
+      // await RoomBoy.findByIdAndUpdate(data.roomBoyId,{$push:{}})
+    }
+    let checkinRoomDetails = [];
+    req.body.roomFinalDetails.map(details =>
+      checkinRoomDetails.push(
+        _.pick(details, ["roomNumber", "selectedExtraBed", "adults", "children", "roomBoyId"])
+      )
+    );
+
+    const booking = await Booking.findByIdAndUpdate(
+      req.body._id,
+      {
+        $set: {
+          status: "checkedin",
+          roomFinalDetails: checkinRoomDetails,
+          identityProof: req.body.identityProof,
+          identityProofNumber: req.body.identityProofNumber,
+        },
+      },
+      {new: true}
+    );
+
+    guest = await Guest.findById(booking.guestId);
+    if (!guest) guest = await OfflineGuest.findById(booking.guestId);
+
+    guest["phoneNumber"] = req.body.phoneNumber;
+    guest["address"] = req.body.address;
+    guest.save().then(() => {
+      if (guest.email) {
+        checkinMail(guest.email, booking);
+      }
+
+      if (guest.phoneNumber) {
+        checkinMessage(booking, guest.phoneNumber);
+      }
     });
 
-    // await RoomBoy.findByIdAndUpdate(data.roomBoyId,{$push:{}})
-
+    res.send("done");
   }
-  let checkinRoomDetails=[]
-  req.body.roomFinalDetails.map(details=>checkinRoomDetails.push(_.pick(details,["roomNumber","selectedExtraBed","adults","children","roomBoyId"])))
-
-  const booking=await Booking.findByIdAndUpdate(req.body._id, {
-    $set: {
-      status: "checkedin",
-      roomFinalDetails: checkinRoomDetails,
-      identityProof: req.body.identityProof,
-      identityProofNumber: req.body.identityProofNumber,
-    },
-  },{new:true});
-
-  guest = await Guest.findById(booking.guestId);
-  if (!guest) guest = await OfflineGuest.findById(booking.guestId);
-
-  
-  guest["phoneNumber"]=req.body.phoneNumber
-  guest["address"]=req.body.address
-  guest.save().then(()=>{
-    if(guest.email){
-      checkinMail(guest.email,booking)
-    }
-  
-    if(guest.phoneNumber){
-      checkinMessage(booking,guest.phoneNumber)
-    }
-  })
-
-
-  res.send("done");
-});
+);
 
 router.get("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   const booking = await Booking.findById(req.params.id);
-  if(booking.status!=="checkedin") return res.status(400).send("Something went wrong")
-  let hotel=await Hotel.findById(booking.hotelId)
+  if (booking.status !== "checkedin") return res.status(400).send("Something went wrong");
+  let hotel = await Hotel.findById(booking.hotelId);
   let price = 0;
-  let accomodationTotal=0
+  let accomodationTotal = 0;
   for (let data of booking.roomFinalDetails) {
-    const room=await Room.find().where("roomNumbers").in(data.roomNumber)
-    accomodationTotal+=room[0].basePricePerNight
-    accomodationTotal+=data.selectedExtraBed*hotel.pricePerExtraBed
+    const room = await Room.find().where("roomNumbers").in(data.roomNumber);
+    accomodationTotal += room[0].basePricePerNight;
+    accomodationTotal += data.selectedExtraBed * hotel.pricePerExtraBed;
   }
 
-  let restaurantBillAmount=0
+  let restaurantBillAmount = 0;
 
-  booking.restaurantBill.map(item=>{
-    restaurantBillAmount+=item.itemPrice*item.itemQuantity
-  })
+  booking.restaurantBill.map(item => {
+    restaurantBillAmount += item.itemPrice * item.itemQuantity;
+  });
 
-  price+=restaurantBillAmount+accomodationTotal
+  price += restaurantBillAmount + accomodationTotal;
 
   let guest = await Guest.findById(booking.guestId).lean();
   if (!guest) guest = await OfflineGuest.findById(booking.guestId).lean();
   guest["price"] = price;
-  guest["restaurantBillAmount"] =restaurantBillAmount
-  guest["accomodationTotal"] =accomodationTotal
+  guest["restaurantBillAmount"] = restaurantBillAmount;
+  guest["accomodationTotal"] = accomodationTotal;
   res.send(guest);
 });
 
 router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
-  console.log(req.body,"aa")
-  const booking=await Booking.findByIdAndUpdate(req.params.id, {$set: {status: "checkedout",additionalCharges:req.body.items}},{new: true});
+  console.log(req.body, "aa");
+  const booking = await Booking.findByIdAndUpdate(
+    req.params.id,
+    {$set: {status: "checkedout", additionalCharges: req.body.items}},
+    {new: true}
+  );
 
   let guest = await Guest.findById(booking.guestId).lean();
-  if (!guest) guest = await OfflineGuest.findById(booking.guestId).lean();
-  if(guest.email){
-    await checkoutMail(guest.email,booking)
+  if (guest) {
+    await Guest.findByIdAndUpdate(booking.guestId)
+      .where("bookedHotelDetails")
+      .pull(booking.hotelId);
+
+    await Guest.findByIdAndUpdate(booking.guestId)
+      .where("previousBookedHotelDetails")
+      .push(booking.hotelId);
+  }  
+
+  if (!guest) {
+    guest = await OfflineGuest.findById(booking.guestId).lean();
+    await OfflineGuest.findByIdAndUpdate(booking.guestId)
+      .where("bookedHotelDetails")
+      .pull(booking.hotelId);
+
+      await OfflineGuest.findByIdAndUpdate(booking.guestId)
+      .where("previousBookedHotelDetails")
+      .push(booking.hotelId);  
   }
-  if(guest.phoneNumber){
-    await checkoutMessage(booking,guest.phoneNumber)
+  if (guest.email) {
+    await checkoutMail(guest.email, booking);
+  }
+  if (guest.phoneNumber) {
+    await checkoutMessage(booking, guest.phoneNumber);
   }
   res.send("done");
 });
@@ -438,7 +472,7 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
     await roomDB.save();
   }
 
-  const bookingsCount=await Booking.find().count()
+  const bookingsCount = await Booking.find().count();
 
   const roomData = {};
   roomData["guestId"] = offlineGuestId;
@@ -452,18 +486,20 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
   roomData["endingDayOfStay"] = allTheDays[allTheDays.length - 1];
   roomData["roomDetails"] = roomsDetails;
   roomData["bookingMode"] = "offline";
-  roomData["hotelBookingId"]=""+Math.floor(Math.random() * (99 - 10 + 1) + 10)+bookingsCount
+  roomData["hotelBookingId"] = "" + Math.floor(Math.random() * (99 - 10 + 1) + 10) + bookingsCount;
   // roomData["totalPrice"] = totalPrice;
 
   const booking = new Booking(roomData);
   await booking.save();
 
-  const offlineGuestData=await OfflineGuest.findByIdAndUpdate(offlineGuestId, {$push: {bookedHotelDetails: booking._id}});
-  if(offlineGuestData.email){
-    await bookedMail(offlineGuestData.email,booking,offlineGuestData.name)
+  const offlineGuestData = await OfflineGuest.findByIdAndUpdate(offlineGuestId, {
+    $push: {bookedHotelDetails: booking._id},
+  });
+  if (offlineGuestData.email) {
+    await bookedMail(offlineGuestData.email, booking, offlineGuestData.name);
   }
-  if(offlineGuestData.phoneNumber){
-    await bookedMessage(booking.hotelBookingId,offlineGuestData.phoneNumber)
+  if (offlineGuestData.phoneNumber) {
+    await bookedMessage(booking.hotelBookingId, offlineGuestData.phoneNumber);
   }
   res.send("Successfully booked");
 });

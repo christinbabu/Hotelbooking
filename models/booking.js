@@ -66,6 +66,10 @@ const bookingSchema = new mongoose.Schema({
     type:String,
     required: true,
   },
+  linkReviewId:{
+    type:String,
+    default: ""+Math.floor(Math.random() * (999 - 100 + 1) + 100)+Date.now(),
+  },
   status: {
     type: String,
     default: "yettostay",

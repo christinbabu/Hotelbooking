@@ -8,7 +8,7 @@ module.exports = function (booking, phoneNumber) {
     phoneNumber.substring(2, Infinity)
   }
 
-  let message = `You have successfully checked out your room. Thank You.`;
+  let message = `You have successfully checked out your room. Thank You. Please kindly add a review. http://localhost:3000/linkreview/${booking.linkReviewId}`;
 
   fast2sms
     .sendMessage({

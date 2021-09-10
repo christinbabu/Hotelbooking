@@ -16,6 +16,7 @@ const getHotels=require("../routes/guest/getHotelsName")
 const bookings = require("../routes/guest/bookings");
 const getrooms = require("../routes/guest/rooms");
 const reviews = require("../routes/guest/reviews");
+const linkReview = require("../routes/guest/linkReview");
 const review = require("../routes/guest/review");
 const guestChangePassword = require("../routes/guest/changePassword");
 
@@ -52,6 +53,7 @@ module.exports = function (app) {
   app.use("/api/guest/gethotels", getHotels);
   app.use("/api/guest/bookings", bookings);
   app.use("/api/guest/room", getrooms);
+  app.use("/api/guest/linkReview", linkReview);
   app.use("/api/guest/review", reviews);
   app.use("/api/guest/reviewbyid", review);
   app.use("/api/guest/changePassword", guestChangePassword);

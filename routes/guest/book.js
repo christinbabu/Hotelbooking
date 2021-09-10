@@ -349,6 +349,9 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
+  const data=await Booking.findById(req.params.id)
+  if(data.status!=="yettostay") return res.status(400).send("Cancellation revoked!")
+
   const LocalDate = JSJoda.LocalDate;
   const booking = await Booking.findByIdAndDelete(req.params.id);
   console.log(booking, "bkng");
