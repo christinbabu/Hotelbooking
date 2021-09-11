@@ -30,6 +30,10 @@ router.get("/", [auth, guestMiddleware], async (req, res) => {
     bookings[index].rating = hotel.reviewScore;
     bookings[index].hotelName = hotel.hotelName;
 
+    totalNoOfExtraBeds=0
+    checkoutAdditionalCharges=0
+    restaurantBillAmount = 0;
+    additionalCharges=0
     totalPrice = 0;
     totalBeds = 0;
     totalGuests = 0;
@@ -44,6 +48,36 @@ router.get("/", [auth, guestMiddleware], async (req, res) => {
       totalGuests += objectValues[0] * objectValues[3];
       totalRooms += objectValues[0];
     }
+
+    // const hotel=await Hotel.findById(booking.hotelId)
+    // booking.roomFinalDetails.map(details=>{
+    //   if(details.selectedExtraBed){
+    //     totalNoOfExtraBeds+=details.selectedExtraBed
+    //   }
+    // })
+
+  if(booking.roomFinalDetails){
+    booking.roomFinalDetails.map(details=>{
+      if(details.selectedExtraBed){
+        totalNoOfExtraBeds+=details.selectedExtraBed
+      }
+    })
+  }
+
+  if(booking.restaurantBill){
+    booking.restaurantBill.map(item => {
+      restaurantBillAmount += item.itemPrice * item.itemQuantity;
+    });
+  }
+
+  if(booking.additionalCharges){
+    booking.additionalCharges.map(item => {
+      checkoutAdditionalCharges += Number(item.itemPrice);
+    });
+  }
+  // console.log(totalNoOfExtraBeds,"te")
+
+    bookings[index].additionalCharges = (totalNoOfExtraBeds*hotel.pricePerExtraBed)+restaurantBillAmount+checkoutAdditionalCharges;
     bookings[index].totalPrice = totalPrice;
     bookings[index].totalBeds = totalBeds;
     bookings[index].totalGuests = totalGuests;
@@ -83,6 +117,50 @@ router.get("/guest",[auth, guestMiddleware], async (req, res)=>{
   }
 
   return res.send(_.flattenDeep(finalRoomsData));
+})
+
+router.get("/downloadInvoice/:id",[auth, guestMiddleware], async (req, res)=>{
+  console.log(req.params.id,"rpi")
+  const booking = await Booking.findById(req.params.id);
+  if (booking.status !== "checkedout") return res.status(400).send("Something went wrong");
+  let hotel = await Hotel.findById(booking.hotelId);
+  let price = 0;
+  let accomodationTotal = 0;
+  let extraBedTotal=0
+  let extraAdditionalCharges=0
+  let inputFields={items:[]}
+  for (let data of booking.roomFinalDetails) {
+    const room = await Room.find().where("roomNumbers").in(data.roomNumber);
+    accomodationTotal += room[0].basePricePerNight;
+    extraBedTotal += data.selectedExtraBed * hotel.pricePerExtraBed;
+  }
+
+  let restaurantBillAmount = 0;
+
+  booking.restaurantBill.map(item => {
+    restaurantBillAmount += item.itemPrice * item.itemQuantity;
+  });
+
+  
+  booking?.additionalCharges?.map(additionalCharge=>{
+    let object={}
+    object["itemName"]=additionalCharge.itemName
+    object["itemPrice"]=Number(additionalCharge.itemPrice)
+    inputFields.items.push(object)
+    extraAdditionalCharges+=Number(additionalCharge.itemPrice)
+  })
+
+  price += restaurantBillAmount + accomodationTotal+extraBedTotal+extraAdditionalCharges;
+
+  let guest = await Guest.findById(booking.guestId).lean();
+  if (!guest) guest = await OfflineGuest.findById(booking.guestId).lean();
+  guest["price"] = price;
+  guest["restaurantBillAmount"] = restaurantBillAmount;
+  guest["accomodationTotal"] = accomodationTotal;
+  guest["extraBedTotal"] = extraBedTotal;
+  guest["inputFields"]=inputFields;
+  guest["endingDayOfStay"] =booking?.endingDayOfStay
+  res.send(guest);
 })
 
 module.exports = router;

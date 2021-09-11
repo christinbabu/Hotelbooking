@@ -1,5 +1,2 @@
 TODO: 
-display bookingID wherever possible...
-forget password
-email and message(for booking, checkin and checkout)
-download invoice by customer
+early checkout

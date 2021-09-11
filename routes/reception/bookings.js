@@ -317,10 +317,11 @@ router.get("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   let hotel = await Hotel.findById(booking.hotelId);
   let price = 0;
   let accomodationTotal = 0;
+  let extraBedTotal=0
   for (let data of booking.roomFinalDetails) {
     const room = await Room.find().where("roomNumbers").in(data.roomNumber);
     accomodationTotal += room[0].basePricePerNight;
-    accomodationTotal += data.selectedExtraBed * hotel.pricePerExtraBed;
+    extraBedTotal += data.selectedExtraBed * hotel.pricePerExtraBed;
   }
 
   let restaurantBillAmount = 0;
@@ -336,6 +337,7 @@ router.get("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   guest["price"] = price;
   guest["restaurantBillAmount"] = restaurantBillAmount;
   guest["accomodationTotal"] = accomodationTotal;
+  guest["extraBedTotal"] = extraBedTotal;
   res.send(guest);
 });
 
@@ -349,24 +351,24 @@ router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
 
   let guest = await Guest.findById(booking.guestId).lean();
   if (guest) {
-    await Guest.findByIdAndUpdate(booking.guestId)
-      .where("bookedHotelDetails")
-      .pull(booking.hotelId);
+    await Guest.findByIdAndUpdate(booking.guestId, {
+      $pull: {bookedHotelDetails: {$in: [booking.hotelId]}},
+    });
 
-    await Guest.findByIdAndUpdate(booking.guestId)
-      .where("previousBookedHotelDetails")
-      .push(booking.hotelId);
-  }  
+    await Guest.findByIdAndUpdate(booking.guestId, {
+      $push: {previousBookedHotelDetails: booking.hotelId},
+    });
+  }
 
   if (!guest) {
     guest = await OfflineGuest.findById(booking.guestId).lean();
-    await OfflineGuest.findByIdAndUpdate(booking.guestId)
-      .where("bookedHotelDetails")
-      .pull(booking.hotelId);
+    await OfflineGuest.findByIdAndUpdate(booking.guestId, {
+      $pull: {bookedHotelDetails: {$in: [booking.hotelId]}},
+    });
 
-      await OfflineGuest.findByIdAndUpdate(booking.guestId)
-      .where("previousBookedHotelDetails")
-      .push(booking.hotelId);  
+    await OfflineGuest.findByIdAndUpdate(booking.guestId, {
+      $push: {previousBookedHotelDetails: booking.hotelId},
+    });
   }
   if (guest.email) {
     await checkoutMail(guest.email, booking);
@@ -426,6 +428,49 @@ router.get("/completed", [auth, receptionMiddleware], async (req, res) => {
   }
   res.send(finalData);
 });
+
+router.get("/downloadInvoice/:id",[auth, receptionMiddleware], async (req, res)=>{
+  const booking = await Booking.findById(req.params.id);
+  if (booking.status !== "checkedout") return res.status(400).send("Something went wrong");
+  let hotel = await Hotel.findById(booking.hotelId);
+  let price = 0;
+  let accomodationTotal = 0;
+  let extraBedTotal=0
+  let extraAdditionalCharges=0
+  let inputFields={items:[]}
+  for (let data of booking.roomFinalDetails) {
+    const room = await Room.find().where("roomNumbers").in(data.roomNumber);
+    accomodationTotal += room[0].basePricePerNight;
+    extraBedTotal += data.selectedExtraBed * hotel.pricePerExtraBed;
+  }
+
+  let restaurantBillAmount = 0;
+
+  booking.restaurantBill.map(item => {
+    restaurantBillAmount += item.itemPrice * item.itemQuantity;
+  });
+
+  
+  booking?.additionalCharges?.map(additionalCharge=>{
+    let object={}
+    object["itemName"]=additionalCharge.itemName
+    object["itemPrice"]=Number(additionalCharge.itemPrice)
+    inputFields.items.push(object)
+    extraAdditionalCharges+=Number(additionalCharge.itemPrice)
+  })
+
+  price += restaurantBillAmount + accomodationTotal+extraBedTotal+extraAdditionalCharges;
+
+  let guest = await Guest.findById(booking.guestId).lean();
+  if (!guest) guest = await OfflineGuest.findById(booking.guestId).lean();
+  guest["price"] = price;
+  guest["restaurantBillAmount"] = restaurantBillAmount;
+  guest["accomodationTotal"] = accomodationTotal;
+  guest["extraBedTotal"] = extraBedTotal;
+  guest["inputFields"]=inputFields;
+  guest["endingDayOfStay"] =booking?.endingDayOfStay
+  res.send(guest);
+})
 
 router.post("/", [auth, receptionMiddleware], async (req, res) => {
   const {roomDetails, selectedDayRange, hotelId, offlineGuestId} = req.body;
