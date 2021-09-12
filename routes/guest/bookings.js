@@ -7,6 +7,7 @@ const auth = require("../../middleware/auth");
 const getDays = require("../../utils/getDays");
 const {Hotel} = require("../../models/hotel");
 const {Room} = require("../../models/room");
+const {RoomBoy} = require("../../models/roomBoy");
 const {Booking} = require("../../models/booking");
 const {Guest} = require("../../models/guest");
 const {retrieveMainPhotobyPath, retrieveMainPhoto} = require("../../utils/retrieveImages");
@@ -129,8 +130,18 @@ router.get("/downloadInvoice/:id",[auth, guestMiddleware], async (req, res)=>{
   let extraBedTotal=0
   let extraAdditionalCharges=0
   let inputFields={items:[]}
+  let roomDetails=[]
   for (let data of booking.roomFinalDetails) {
     const room = await Room.find().where("roomNumbers").in(data.roomNumber);
+    let object={}
+    const roomBoy=await RoomBoy.findById(data?.roomBoyId)
+    object["roomBoy"]=roomBoy?.name
+    object["roomType"]=data?.roomType
+    object["roomNumber"]=data?.roomNumber
+    object["guests"]=Number(data?.adults)+Number(data?.children)
+    object["adults"]=Number(data?.adults)
+    object["children"]=Number(data?.children)
+    roomDetails.push(object)
     accomodationTotal += room[0].basePricePerNight;
     extraBedTotal += data.selectedExtraBed * hotel.pricePerExtraBed;
   }
@@ -160,6 +171,7 @@ router.get("/downloadInvoice/:id",[auth, guestMiddleware], async (req, res)=>{
   guest["extraBedTotal"] = extraBedTotal;
   guest["inputFields"]=inputFields;
   guest["endingDayOfStay"] =booking?.endingDayOfStay
+  guest["roomDetails"] =roomDetails
   res.send(guest);
 })
 

@@ -9,6 +9,8 @@ const {Hotel} = require("../../models/hotel");
 const {Room} = require("../../models/room");
 const {RoomBoy} = require("../../models/roomBoy");
 const {Booking, validateBooking} = require("../../models/booking");
+const days = require("days-in-a-row");
+const JSJoda = require("js-joda");
 const {Guest} = require("../../models/guest");
 const {retrieveMainPhotobyPath, retrieveMainPhoto} = require("../../utils/retrieveImages");
 const validateObjectId = require("../../middleware/validateObjectId");
@@ -275,7 +277,14 @@ router.post(
     let checkinRoomDetails = [];
     req.body.roomFinalDetails.map(details =>
       checkinRoomDetails.push(
-        _.pick(details, ["roomNumber", "selectedExtraBed", "adults", "children", "roomBoyId"])
+        _.pick(details, [
+          "roomNumber",
+          "selectedExtraBed",
+          "adults",
+          "children",
+          "roomBoyId",
+          "roomType",
+        ])
       )
     );
 
@@ -317,9 +326,21 @@ router.get("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   let hotel = await Hotel.findById(booking.hotelId);
   let price = 0;
   let accomodationTotal = 0;
-  let extraBedTotal=0
+  let extraBedTotal = 0;
+  let roomNumbers = [];
+  let roomDetails = [];
   for (let data of booking.roomFinalDetails) {
-    const room = await Room.find().where("roomNumbers").in(data.roomNumber);
+    let object = {};
+    roomNumbers.push(data.roomNumber);
+    const roomBoy = await RoomBoy.findById(data?.roomBoyId);
+    object["roomBoy"] = roomBoy?.name;
+    object["roomType"] = data?.roomType;
+    object["roomNumber"] = data?.roomNumber;
+    object["guests"] = Number(data?.adults) + Number(data?.children);
+    object["adults"] = Number(data?.adults);
+    object["children"] = Number(data?.children);
+    roomDetails.push(object);
+    let room = await Room.find().where("roomNumbers").in(data.roomNumber);
     accomodationTotal += room[0].basePricePerNight;
     extraBedTotal += data.selectedExtraBed * hotel.pricePerExtraBed;
   }
@@ -338,16 +359,72 @@ router.get("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   guest["restaurantBillAmount"] = restaurantBillAmount;
   guest["accomodationTotal"] = accomodationTotal;
   guest["extraBedTotal"] = extraBedTotal;
+  guest["roomNumbers"] = roomNumbers;
+  guest["roomDetails"] = roomDetails;
   res.send(guest);
 });
 
 router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   console.log(req.body, "aa");
+
+  req?.body?.roomNumbers.map(async roomNumber => {
+    await Room.findOneAndUpdate(
+      {roomNumbers: {$in: [roomNumber]}, availableRoomNumbers: {$nin: [roomNumber]}},
+      {$push: {availableRoomNumbers: roomNumber}}
+    );
+  });
+  // console.log(room,"room")
   const booking = await Booking.findByIdAndUpdate(
     req.params.id,
     {$set: {status: "checkedout", additionalCharges: req.body.items}},
     {new: true}
   );
+
+  var dateObj = new Date();
+  let month = dateObj.getUTCMonth() + 1; //months from 1-12
+  let date = dateObj.getUTCDate();
+  let year = dateObj.getUTCFullYear();
+  month = month.toString();
+  if (month.length == 1) {
+    month = "0" + month;
+  }
+
+  date = date.toString();
+  if (date.length == 1) {
+    date = "0" + date;
+  }
+
+  newdate = year + "-" + month + "-" + date;
+
+  // const booking = await Booking.findById(req.params.id)
+  const LocalDate = JSJoda.LocalDate;
+
+  function getNumberOfDays(start, end) {
+    const start_date = new LocalDate.parse(start);
+    const end_date = new LocalDate.parse(end);
+
+    return JSJoda.ChronoUnit.DAYS.between(start_date, end_date);
+  }
+
+  var num = getNumberOfDays(booking.startingDayOfStay, booking.endingDayOfStay);
+
+  let allTheDays = days(new Date(newdate), num + 1);
+  console.log(allTheDays,"ad")
+
+  if(allTheDays[0]){
+    for (let [key, value] of Object.entries(booking.roomDetails)) {
+      console.log(key, "ky");
+      const room = await Room.findById(key);
+      allTheDays.map(day => {
+        room.numberOfBookingsByDate[day] =
+          room?.numberOfBookingsByDate[day] - value.numberOfRoomsBooked;
+      });
+      
+      room.bookingFullDates = _.difference(room.bookingFullDates, allTheDays);
+      room.markModified("numberOfBookingsByDate", "bookingFullDates");
+      await room.save();
+    }
+  }
 
   let guest = await Guest.findById(booking.guestId).lean();
   if (guest) {
@@ -423,23 +500,34 @@ router.get("/completed", [auth, receptionMiddleware], async (req, res) => {
     if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
     bookings[i]["name"] = guest.name;
     bookings[i]["email"] = guest.email;
-    bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
+    bookings[i]["phoneNumber"] = guest?.phoneNumber || "None";
     finalData.push(bookings[i]);
   }
   res.send(finalData);
 });
 
-router.get("/downloadInvoice/:id",[auth, receptionMiddleware], async (req, res)=>{
+router.get("/downloadInvoice/:id", [auth, receptionMiddleware], async (req, res) => {
   const booking = await Booking.findById(req.params.id);
   if (booking.status !== "checkedout") return res.status(400).send("Something went wrong");
   let hotel = await Hotel.findById(booking.hotelId);
   let price = 0;
   let accomodationTotal = 0;
-  let extraBedTotal=0
-  let extraAdditionalCharges=0
-  let inputFields={items:[]}
+  let extraBedTotal = 0;
+  let extraAdditionalCharges = 0;
+  let inputFields = {items: []};
+  let roomDetails = [];
+
   for (let data of booking.roomFinalDetails) {
+    let object = {};
     const room = await Room.find().where("roomNumbers").in(data.roomNumber);
+    const roomBoy = await RoomBoy.findById(data?.roomBoyId);
+    object["roomBoy"] = roomBoy?.name;
+    object["roomType"] = data?.roomType;
+    object["roomNumber"] = data?.roomNumber;
+    object["guests"] = Number(data?.adults) + Number(data?.children);
+    object["adults"] = Number(data?.adults);
+    object["children"] = Number(data?.children);
+    roomDetails.push(object);
     accomodationTotal += room[0].basePricePerNight;
     extraBedTotal += data.selectedExtraBed * hotel.pricePerExtraBed;
   }
@@ -450,16 +538,15 @@ router.get("/downloadInvoice/:id",[auth, receptionMiddleware], async (req, res)=
     restaurantBillAmount += item.itemPrice * item.itemQuantity;
   });
 
-  
-  booking?.additionalCharges?.map(additionalCharge=>{
-    let object={}
-    object["itemName"]=additionalCharge.itemName
-    object["itemPrice"]=Number(additionalCharge.itemPrice)
-    inputFields.items.push(object)
-    extraAdditionalCharges+=Number(additionalCharge.itemPrice)
-  })
+  booking?.additionalCharges?.map(additionalCharge => {
+    let object = {};
+    object["itemName"] = additionalCharge.itemName;
+    object["itemPrice"] = Number(additionalCharge.itemPrice);
+    inputFields.items.push(object);
+    extraAdditionalCharges += Number(additionalCharge.itemPrice);
+  });
 
-  price += restaurantBillAmount + accomodationTotal+extraBedTotal+extraAdditionalCharges;
+  price += restaurantBillAmount + accomodationTotal + extraBedTotal + extraAdditionalCharges;
 
   let guest = await Guest.findById(booking.guestId).lean();
   if (!guest) guest = await OfflineGuest.findById(booking.guestId).lean();
@@ -467,10 +554,11 @@ router.get("/downloadInvoice/:id",[auth, receptionMiddleware], async (req, res)=
   guest["restaurantBillAmount"] = restaurantBillAmount;
   guest["accomodationTotal"] = accomodationTotal;
   guest["extraBedTotal"] = extraBedTotal;
-  guest["inputFields"]=inputFields;
-  guest["endingDayOfStay"] =booking?.endingDayOfStay
+  guest["inputFields"] = inputFields;
+  guest["endingDayOfStay"] = booking?.endingDayOfStay;
+  guest["roomDetails"] = roomDetails;
   res.send(guest);
-})
+});
 
 router.post("/", [auth, receptionMiddleware], async (req, res) => {
   const {roomDetails, selectedDayRange, hotelId, offlineGuestId} = req.body;

@@ -370,6 +370,7 @@ router.delete("/:id", async (req, res) => {
       room.numberOfBookingsByDate[day] =
         room?.numberOfBookingsByDate[day] - value.numberOfRoomsBooked;
     });
+    
     room.bookingFullDates = _.difference(room.bookingFullDates, totalDays);
     room.markModified("numberOfBookingsByDate", "bookingFullDates");
     await room.save();
