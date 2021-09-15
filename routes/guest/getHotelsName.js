@@ -13,6 +13,7 @@ const {retrieveMainPhoto, retrieveOtherPhotos} = require("../../utils/retrieveIm
 const validateObjectId = require("../../middleware/validateObjectId");
 
 router.get("/", async (req, res) => {
+  console.log(req.headers.host,"rq")
   let hotel = await Hotel.find().where("hotelRooms").exists(true).ne([]).select({city:1});
   if (!hotel) return res.status(404).send("No hotels found found");
   res.send(hotel);
