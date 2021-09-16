@@ -68,7 +68,7 @@ const bookingSchema = new mongoose.Schema({
   },
   linkReviewId:{
     type:String,
-    default: ""+Math.floor(Math.random() * (999 - 100 + 1) + 100)+Date.now(),
+    required: true,
   },
   status: {
     type: String,

@@ -338,12 +338,13 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
   roomData["roomDetails"] = roomsDetails;
   roomData["bookingMode"] = "online";
   roomData["hotelBookingId"]=""+Math.floor(Math.random() * (99 - 10 + 1) + 10)+bookingsCount
+  roomData["linkReviewId"]=""+Math.floor(Math.random() * (999 - 100 + 1) + 100)+Date.now()
   // roomData["totalPrice"] = totalPrice;
 
   const newBooking = new Booking(roomData);
   await newBooking.save();
 
-  await Guest.findByIdAndUpdate(req.user._id, {$push: {bookedHotelDetails: newBooking._id}});
+  await Guest.findByIdAndUpdate(req.user._id, {$push: {bookedHotelDetails: newBooking.hotelId}});
   await bookedMail(req.user.email,newBooking,req.user.name)
   res.send("Successfully booked");
 });

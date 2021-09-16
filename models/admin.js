@@ -35,14 +35,6 @@ const adminSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  amountRecievedInMonths: {
-    type: Object,
-    default: null,
-  },
-  amountTransferredInMonths: {
-    type: Object,
-    default: null,
-  },
   hotels:{
     type: Array,
     default:[]

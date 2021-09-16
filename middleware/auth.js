@@ -9,6 +9,7 @@ module.exports = function (req, res, next) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_AUTH_PRIVATE_KEY);
     req.user = decoded;
+    global.__baseurl=req.headers.host
     next();
   } catch (ex) {
     res.status(400).send("Invalid token.");
