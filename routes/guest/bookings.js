@@ -87,10 +87,10 @@ router.get("/", [auth, guestMiddleware], async (req, res) => {
     bookings[index].totalGuests = totalGuests;
     bookings[index].totalRooms = totalRooms;
 
-    bookings[index].startingDayOfStay = new Date(bookings[index].startingDayOfStay).toLocaleString(
-      "en-us",
-      {day: "numeric", month: "long", year: "numeric"}
-    );
+    // bookings[index].startingDayOfStay = new Date(bookings[index].startingDayOfStay).toLocaleString(
+    //   "en-us",
+    //   {day: "numeric", month: "long", year: "numeric"}
+    // );
     bookings[index].endingDayOfStay = booking[index]?.earlyEndingDayOfStay
       ? new Date(getCheckoutDate(bookings[index]?.earlyEndingDayOfStay)).toLocaleString("en-us", {
           day: "numeric",
@@ -98,6 +98,17 @@ router.get("/", [auth, guestMiddleware], async (req, res) => {
           year: "numeric",
         })
       : new Date(getCheckoutDate(bookings[index].endingDayOfStay)).toLocaleString("en-us", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+    bookings[index].startingDayOfStay = booking[index]?.lateStartingDayOfStay
+      ? new Date(getCheckoutDate(bookings[index]?.lateStartingDayOfStay)).toLocaleString("en-us", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : new Date(getCheckoutDate(bookings[index].startingDayOfStay)).toLocaleString("en-us", {
           day: "numeric",
           month: "long",
           year: "numeric",

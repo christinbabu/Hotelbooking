@@ -266,6 +266,24 @@ router.post(
   async (req, res) => {
     createFolder(req.user.email);
 
+    var dateObj = new Date();
+  let month = dateObj.getUTCMonth() + 1; //months from 1-12
+  let date = dateObj.getUTCDate();
+  let year = dateObj.getUTCFullYear();
+  month = month.toString();
+  if (month.length == 1) {
+    month = "0" + month;
+  }
+
+  date = date.toString();
+  if (date.length == 1) {
+    date = "0" + date;
+  }
+
+  newdate = year + "-" + month + "-" + date;
+
+  req.body.startingDayOfStay=req.body.startingDayOfStay.replaceAll("/", "-");
+
     req.body.identityProof = await convertBase64toImage(req.user.email, req.body.identityProof);
     for (let data of req.body.roomFinalDetails) {
       await Room.findByIdAndUpdate(data.roomId, {
@@ -296,6 +314,7 @@ router.post(
           roomFinalDetails: checkinRoomDetails,
           identityProof: req.body.identityProof,
           identityProofNumber: req.body.identityProofNumber,
+          lateStartingDayOfStay:newdate!==req.body.startingDayOfStay?newdate:null
         },
       },
       {new: true}

@@ -11,6 +11,12 @@ const bookingSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
+  lateStartingDayOfStay: {
+    type: String,
+    default: null,
+    minlength: 8,
+    maxlength: 10,
+  },
   startingDayOfStay: {
     type: String,
     required: true,
