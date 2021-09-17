@@ -23,6 +23,12 @@ const bookingSchema = new mongoose.Schema({
     minlength: 8,
     maxlength: 10,
   },
+  earlyEndingDayOfStay: {
+    type: String,
+    default: null,
+    minlength: 8,
+    maxlength: 10,
+  },
   identityProof: {
     type: String,
     default: null,

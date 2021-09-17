@@ -38,10 +38,10 @@ router.post("/:id", [auth, guestMiddleware, validateObjectId], async (req, res) 
     month: "long",
     year: "numeric",
   });
-  result = await Booking.findById(bookingId).select({startingDayOfStay: 1, endingDayOfStay: 1});
+  result = await Booking.findById(bookingId).select({startingDayOfStay: 1, endingDayOfStay: 1,earlyEndingDayOfStay:1});
 
   let date1 = new Date(result.startingDayOfStay);
-  let date2 = new Date(result.endingDayOfStay);
+  let date2 = new Date(result.earlyEndingDayOfStay||result.endingDayOfStay);
   let diffDays = Math.round((date2 - date1) / (1000 * 60 * 60 * 24), 10);
 
   req.body.guestId = req.user._id;

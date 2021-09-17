@@ -66,7 +66,7 @@ router.get("/:id", async (req, res) => {
   // result = await Booking.findById(booking._id).select({startingDayOfStay: 1, endingDayOfStay: 1});
 
   let date1 = new Date(booking.startingDayOfStay);
-  let date2 = new Date(booking.endingDayOfStay);
+  let date2 = new Date(booking?.earlyEndingDayOfStay||booking.endingDayOfStay);
   let diffDays = Math.round((date2 - date1) / (1000 * 60 * 60 * 24), 10);
 
   req.body.guestId = guest._id;

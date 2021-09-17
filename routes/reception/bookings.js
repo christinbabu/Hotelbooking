@@ -409,9 +409,9 @@ router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   var num = getNumberOfDays(booking.startingDayOfStay, booking.endingDayOfStay);
 
   let allTheDays = days(new Date(newdate), num + 1);
-  console.log(allTheDays,"ad")
+  console.log(allTheDays, "ad");
 
-  if(allTheDays[0]){
+  if (allTheDays[0]) {
     for (let [key, value] of Object.entries(booking.roomDetails)) {
       console.log(key, "ky");
       const room = await Room.findById(key);
@@ -419,11 +419,12 @@ router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
         room.numberOfBookingsByDate[day] =
           room?.numberOfBookingsByDate[day] - value.numberOfRoomsBooked;
       });
-      
+
       room.bookingFullDates = _.difference(room.bookingFullDates, allTheDays);
       room.markModified("numberOfBookingsByDate", "bookingFullDates");
       await room.save();
     }
+    await Booking.findByIdAndUpdate(req.params.id, {$set: {earlyEndingDayOfStay: newdate}});
   }
 
   let guest = await Guest.findById(booking.guestId).lean();
@@ -555,7 +556,7 @@ router.get("/downloadInvoice/:id", [auth, receptionMiddleware], async (req, res)
   guest["accomodationTotal"] = accomodationTotal;
   guest["extraBedTotal"] = extraBedTotal;
   guest["inputFields"] = inputFields;
-  guest["endingDayOfStay"] = booking?.endingDayOfStay;
+  guest["endingDayOfStay"] = booking?.earlyEndingDayOfStay||booking?.endingDayOfStay;
   guest["roomDetails"] = roomDetails;
   res.send(guest);
 });
