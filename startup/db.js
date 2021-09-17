@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 module.exports = function () {
   mongoose
-    .connect(MONGODB_KEY, {
+    .connect(process.env.MONGODB_KEY, {
       useUnifiedTopology: true,
       useNewUrlParser: true,
       useFindAndModify: false,
