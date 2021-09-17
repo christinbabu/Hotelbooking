@@ -45,14 +45,12 @@ const hotelSchema = new mongoose.Schema({
     required: true,
   },
   parking: {
-    type: String,
+    type: Boolean,
     required: true,
-    enum: ["No", "Yes, Free", "Yes, Paid"],
   },
-  breakfast: {
-    type: String,
+  restaurant: {
+    type: Boolean,
     required: true,
-    enum: ["No", "Yes, Free", "Yes, Paid"],
   },
   facilities: {
     type: Array,
@@ -88,15 +86,6 @@ const hotelSchema = new mongoose.Schema({
   photos: {
     type: Array,
   },
-  freeCancellationAvailable: {
-    type: String,
-    required: true,
-  },
-  ifNotCancelledBeforeDate: {
-    type: String,
-    required: true,
-    enum: [],
-  },
   checkInStart: {
     type: String,
     required: true,
@@ -113,10 +102,6 @@ const hotelSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  accomodateChildren: {
-    type: Boolean,
-    required: true,
-  },
   allowPets: {
     type: Boolean,
     required: true,
@@ -125,14 +110,6 @@ const hotelSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  isVerified: {
-    type: Boolean,
-    default: false,
-  },
-  incomeInMonth: {
-    type: Object,
-    default: null,
-  },
   reviewIds: {
     type: Array,
     default: [],
@@ -140,10 +117,6 @@ const hotelSchema = new mongoose.Schema({
   hotelRooms: {
     type: Array,
     default: [],
-  },
-  provideDormitoryForDriver: {
-    type: Boolean,
-    required: true,
   },
   receptionId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -171,23 +144,19 @@ function validateHotel(data) {
       .required()
       .length(6)
       .matches(/^[0-9]+$/, "Postal code must include only numbers"),
-    parking: Yup.string().required().oneOf(["No", "Yes, Free", "Yes, Paid"]),
-    breakfast: Yup.string().required().oneOf(["No", "Yes, Free", "Yes, Paid"]),
+    parking: Yup.boolean().required(),
+    restaurant: Yup.boolean().required(),
     facilities: Yup.array(),
     extraBed: Yup.boolean().required(),
     noOfExtraBeds: Yup.number().min(1).max(4),
     pricePerExtraBed: Yup.number().min(0).max(10000).nullable(),
     mainPhoto: Yup.mixed().required(),
     photos: Yup.array().nullable(),
-    freeCancellationAvailable: Yup.string().required(),
-    ifNotCancelledBeforeDate: Yup.string(),
     checkInStart: Yup.string().required(),
     checkInEnd: Yup.string().required(),
     checkOutStart: Yup.string().required(),
     checkOutEnd: Yup.string().required(),
-    accomodateChildren: Yup.boolean().required(),
     allowPets: Yup.boolean().required(),
-    provideDormitoryForDriver: Yup.boolean().required(),
   });
   return schema.validate(data);
 }

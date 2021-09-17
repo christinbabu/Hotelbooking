@@ -51,10 +51,6 @@ const bookingSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  isStayCompleted: {
-    type: Boolean,
-    default: false,
-  },
   reviewId: {
     type: mongoose.Schema.Types.ObjectId,
     default: null,
