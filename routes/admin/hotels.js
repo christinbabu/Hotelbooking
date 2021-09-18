@@ -20,13 +20,16 @@ router.get("/", [auth, adminMiddleware], async (req, res) => {
   pageSize = Number(pageSize);
 
   console.log("back",req.user.username)
-  const {hotels} = await findAdmin(req.user.username);
+  let hotels
+  const data = await findAdmin(req.user.username);
+  if(!data) return res.status(404).send("No hotels found");
+  hotels=data.hotels;
   console.log(hotels,"gg")
   let hotel = await Hotel.find({
     _id: {
       $in: hotels,
     },
-  }).select({_id: 1, hotelName: 1, mainPhoto: 1, city: 1, startingRatePerDay: 1,receptionId:1,restaurantId:1})
+  }).select({_id: 1, hotelName: 1, mainPhoto: 1, city: 1, startingRatePerDay: 1,receptionId:1,restaurantId:1,reviewScore:1,description:1})
     .skip(pageNumber * pageSize)
     .limit(pageSize);
 

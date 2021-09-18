@@ -116,8 +116,8 @@ router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
     .in(req.user.hotelId)
     .where("startingDayOfStay")
     .eq(newdate)
-    .where("startingDayOfStay")
-    .lt(newdate)
+    // .where("startingDayOfStay")
+    // .lt(newdate)
     .where("status")
     .eq("yettostay")
     .lean();

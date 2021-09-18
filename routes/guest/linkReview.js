@@ -8,6 +8,9 @@ const {Review} = require("../../models/review");
 const {Guest} = require("../../models/guest");
 const {OfflineGuest} = require("../../models/offlineGuest");
 const {Booking} = require("../../models/booking");
+const {
+  average
+} = require('average-rating');
 
 router.get("/:id", async (req, res) => {
   const linkReviewId = req.params.id;
@@ -90,6 +93,13 @@ router.get("/:id", async (req, res) => {
     await Booking.findByIdAndUpdate(booking._id, {reviewId: review._id});
   }
 
+  const rating=[]
+  for(let i=0;i<5;i++){
+    rating.push(await Review.find({rating:i+1,hotelId:review.hotelId}).countDocuments())
+  }
+
+  await Hotel.findByIdAndUpdate(review.hotelId, {$set: {reviewScore: average(rating)}});
+  console.log("done")
   res.send(review);
 });
 

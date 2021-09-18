@@ -7,6 +7,9 @@ const {Hotel} = require("../../models/hotel");
 const {Review} = require("../../models/review");
 const {Guest} = require("../../models/guest");
 const {Booking} = require("../../models/booking");
+const {
+  average
+} = require('average-rating');
 
 router.get("/:id", [validateObjectId], async (req, res) => {
   const {reviewIds} = await Hotel.findById(req.params.id).select({reviewIds: 1, _id: 0});
@@ -33,6 +36,8 @@ router.post("/:id", [auth, guestMiddleware, validateObjectId], async (req, res) 
   console.log(result,"nn")
   if(result) return res.status(400).send("You have already reviewed")
 
+  
+
   let reviewedOn = new Date().toLocaleString("en-us", {
     day: "numeric",
     month: "long",
@@ -52,7 +57,23 @@ router.post("/:id", [auth, guestMiddleware, validateObjectId], async (req, res) 
 
   const review = new Review(req.body);
   await review.save();
+
+  
   await Hotel.findByIdAndUpdate(hotelId, {$push: {reviewIds: review._id}});
+
+  const rating=[]
+  for(let i=0;i<5;i++){
+    rating.push(await Review.find({rating:i+1,hotelId}).countDocuments())
+  }
+
+
+  // let newRating
+  // if(hotel.reviewScore<=0){
+  //   newRating=Number(review.rating)
+  // }else{
+  //   newRating=Number(hotel.reviewScore)+Number(review.rating)/reviewsCount
+  // }
+  await Hotel.findByIdAndUpdate(hotelId, {$set: {reviewScore: average(rating)}});
   await Guest.findByIdAndUpdate(req.user._id, {
     $push: {reviewedHotelIds: hotelId, reviewIds: review._id},
   });
@@ -70,11 +91,27 @@ router.put("/:id", [auth, guestMiddleware, validateObjectId], async (req, res) =
   const editPermission = reviewIds.includes(req.params.id);
   if (!editPermission) return res.status(400).send("You don't have permission to edit");
 
+  let hotelId=review.hotelId
   review.review = req.body.review;
   review.rating = req.body.rating;
   review.markModified("review", "rating");
-
   await review.save();
+
+  const rating=[]
+  for(let i=0;i<5;i++){
+    rating.push(await Review.find({rating:i+1,hotelId}).countDocuments())
+  }
+
+
+  // let newRating
+  // if(hotel.reviewScore<=0){
+  //   newRating=Number(review.rating)
+  // }else{
+  //   newRating=Number(hotel.reviewScore)+Number(review.rating)/reviewsCount
+  // }
+  // console.log(average(rating),"vvd")
+  await Hotel.findByIdAndUpdate(hotelId, {$set: {reviewScore: average(rating)}});
+
   res.send(review);
 });
 
