@@ -35,10 +35,10 @@ const restaurantSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
-  items:{
-    type:Array,
-    default:null
-  }
+  items: {
+    type: Array,
+    default: null,
+  },
 });
 
 restaurantSchema.methods.generateAuthToken = function () {
@@ -48,7 +48,7 @@ restaurantSchema.methods.generateAuthToken = function () {
       username: this.username,
       isRestaurant: true,
       email: this.email,
-      hotelId:this.hotelId,
+      hotelId: this.hotelId,
     },
     process.env.JWT_AUTH_PRIVATE_KEY
   );
@@ -69,7 +69,6 @@ restaurantSchema.methods.generateResetToken = function () {
 
 const Restaurant = mongoose.model("restaurant", restaurantSchema);
 
-
 function validateRestaurant(data) {
   const schema = Yup.object().shape({
     name: Yup.string().min(2).max(50).required("Name is required").label("Name"),
@@ -86,8 +85,13 @@ function validateRestaurant(data) {
 
 function validateRestaurantPassword(data) {
   const schema = Yup.object({
-    oldpassword: Yup.string(),
-    newPassword: Yup.string().required("Password is required").min(6).max(256).label("Password"),
+    oldPassword:Yup.string().required().min(6).max(256).label("Old Password"),
+    newPassword: Yup.string()
+      .notOneOf([Yup.ref("oldPassword"), null], "Old Password Should not be same as new password")
+      .required("Password is required")
+      .min(6)
+      .max(256)
+      .label("Password"),
     confirmPassword: Yup.string().oneOf([Yup.ref("newPassword"), null], "Passwords must match"),
   });
 

@@ -116,6 +116,8 @@ router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
     .in(req.user.hotelId)
     .where("startingDayOfStay")
     .eq(newdate)
+    .where("startingDayOfStay")
+    .lt(newdate)
     .where("status")
     .eq("yettostay")
     .lean();
@@ -281,8 +283,8 @@ router.post(
   }
 
   newdate = year + "-" + month + "-" + date;
-
-  req.body.startingDayOfStay=req.body.startingDayOfStay.replaceAll("/", "-");
+// console.log(req.body,"nji")
+  req.body.startingDayOfStay=req.body.startingDayOfStay.replace(/\//g,"-")
 
     req.body.identityProof = await convertBase64toImage(req.user.email, req.body.identityProof);
     for (let data of req.body.roomFinalDetails) {
@@ -291,7 +293,7 @@ router.post(
       });
 
       // await RoomBoy.findByIdAndUpdate(data.roomBoyId,{$push:{}})
-    }
+    } 
     let checkinRoomDetails = [];
     req.body.roomFinalDetails.map(details =>
       checkinRoomDetails.push(
@@ -381,6 +383,37 @@ router.get("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   guest["roomNumbers"] = roomNumbers;
   guest["roomDetails"] = roomDetails;
   res.send(guest);
+});
+
+router.delete("/:id",[auth, receptionMiddleware], async (req, res) => {
+  const data=await Booking.findById(req.params.id)
+  if(data.status!=="yettostay") return res.status(400).send("Cancellation revoked!")
+
+  const LocalDate = JSJoda.LocalDate;
+  const booking = await Booking.findByIdAndDelete(req.params.id);
+  console.log(booking, "bkng");
+  const start_date = new LocalDate.parse(booking.startingDayOfStay);
+  const end_date = new LocalDate.parse(booking.endingDayOfStay);
+
+  const totalDays = days(
+    new Date(booking.startingDayOfStay),
+    JSJoda.ChronoUnit.DAYS.between(start_date, end_date) + 1
+  );
+  console.log(totalDays, "td");
+  for (let [key, value] of Object.entries(booking.roomDetails)) {
+    console.log(key, "ky");
+    const room = await Room.findById(key);
+    totalDays.map(day => {
+      room.numberOfBookingsByDate[day] =
+        room?.numberOfBookingsByDate[day] - value.numberOfRoomsBooked;
+    });
+    
+    room.bookingFullDates = _.difference(room.bookingFullDates, totalDays);
+    room.markModified("numberOfBookingsByDate", "bookingFullDates");
+    await room.save();
+  }
+
+  res.send("Successfully cancelled booking");
 });
 
 router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
@@ -640,6 +673,7 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
   roomData["roomDetails"] = roomsDetails;
   roomData["bookingMode"] = "offline";
   roomData["hotelBookingId"] = "" + Math.floor(Math.random() * (99 - 10 + 1) + 10) + bookingsCount;
+  roomData["linkReviewId"]=""+Math.floor(Math.random() * (999 - 100 + 1) + 100)+Date.now()
   // roomData["totalPrice"] = totalPrice;
 
   const booking = new Booking(roomData);

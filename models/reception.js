@@ -82,8 +82,13 @@ function validateReception(data) {
 
 function validateReceptionPassword(data) {
   const schema = Yup.object({
-    oldpassword: Yup.string(),
-    newPassword: Yup.string().required("Password is required").min(6).max(256).label("Password"),
+    oldPassword:Yup.string().required().min(6).max(256).label("Old Password"),
+    newPassword: Yup.string()
+      .notOneOf([Yup.ref("oldPassword"), null], "Old Password Should not be same as new password")
+      .required("Password is required")
+      .min(6)
+      .max(256)
+      .label("Password"),
     confirmPassword: Yup.string().oneOf([Yup.ref("newPassword"), null], "Passwords must match"),
   });
 

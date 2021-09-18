@@ -349,7 +349,7 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
   res.send("Successfully booked");
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",[auth, guestMiddleware], async (req, res) => {
   const data=await Booking.findById(req.params.id)
   if(data.status!=="yettostay") return res.status(400).send("Cancellation revoked!")
 
