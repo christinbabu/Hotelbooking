@@ -16,6 +16,7 @@ module.exports = async function (email, base64) {
   //   .toFile(newPath)
   //   .catch(err => console.log(err));
 // console.log(newPath,"newp");
+console.log(__basedir,"bd")
   if (__baseurl !== "localhost:3800"){
     await sharp(buffer)
     .resize(1920, 1080)
@@ -23,7 +24,7 @@ module.exports = async function (email, base64) {
     .catch(err => console.log(err));
     return "/app/public/admin@gmail.com/1631544393660545429158307.jpg";
   }else{
-    return "E:/Codes/Node.js/New Projects/hotelbook-api/public/admin@gmail.com/1631544393660545429158307.jpg";
+    return `${__basedir}/public/admin@gmail.com/1631544393660545429158307.jpg`;
   }
   
   // return newPath;
