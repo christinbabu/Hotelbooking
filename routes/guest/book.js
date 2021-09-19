@@ -330,7 +330,7 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
   roomData["hotelId"] = hotelId;
   roomData["bookedOn"] = new Date().toLocaleString("en-us", {
     day: "numeric",
-    month: "long",
+    month: "short",
     year: "numeric",
   });
   roomData["startingDayOfStay"] = allTheDays[0];

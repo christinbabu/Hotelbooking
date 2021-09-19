@@ -115,9 +115,7 @@ router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
     .where("hotelId")
     .in(req.user.hotelId)
     .where("startingDayOfStay")
-    .eq(newdate)
-    // .where("startingDayOfStay")
-    // .lt(newdate)
+    .lte(newdate)
     .where("status")
     .eq("yettostay")
     .lean();
@@ -413,7 +411,48 @@ router.delete("/:id",[auth, receptionMiddleware], async (req, res) => {
     await room.save();
   }
 
-  res.send("Successfully cancelled booking");
+  var dateObj = new Date();
+  let date = dateObj.getUTCDate();
+  let month = dateObj.getUTCMonth() + 1; //months from 1-12
+  let year = dateObj.getUTCFullYear();
+
+  date = date.toString();
+  if (date.length == 1) {
+    date = "0" + date;
+  }
+
+  month = month.toString();
+  if (month.length == 1) {
+    month = "0" + month;
+  }
+
+  newdate = year + "-" + month + "-" + date;
+  console.log(newdate);
+  const bookings = await Booking.find()
+    .where("hotelId")
+    .in(booking.hotelId)
+    .where("startingDayOfStay")
+    .eq(newdate)
+    // .where("startingDayOfStay")
+    // .lt(newdate)
+    .where("status")
+    .eq("yettostay")
+    .lean();
+  // if (!bookings[0]) return res.status(404).send("No bookings for today");
+
+  let finalData = [];
+
+  for (i = 0; i < bookings.length; i++) {
+    let guest = await Guest.findById(bookings[i].guestId);
+    if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
+    bookings[i]["endingDayOfStay"] = getCheckoutDate(bookings[i]["endingDayOfStay"]);
+    bookings[i]["name"] = guest.name;
+    bookings[i]["email"] = guest.email;
+    bookings[i]["phoneNumber"] = guest?.phoneNumber || "919164253030";
+    finalData.push(bookings[i]);
+  }
+  res.send(finalData);
+  // res.send("Successfully cancelled booking");
 });
 
 router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
@@ -665,7 +704,7 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
   roomData["hotelId"] = hotelId;
   roomData["bookedOn"] = new Date().toLocaleString("en-us", {
     day: "numeric",
-    month: "long",
+    month: "short",
     year: "numeric",
   });
   roomData["startingDayOfStay"] = allTheDays[0];
