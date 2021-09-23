@@ -56,7 +56,7 @@ const hotelSchema = new mongoose.Schema({
   description:{
     type:String,
     required:true,
-    minlength:80,
+    minlength:120,
     maxlength:160
   },
   facilities: {
@@ -146,7 +146,7 @@ function validateHotel(data) {
       .length(12)
       .matches(/^[0-9]+$/, "Mobile number must include only numbers"),
     address: Yup.string().required().min(8).max(255),
-    description:Yup.string().required().min(80).max(160),
+    description:Yup.string().required().min(120).max(160),
     city: Yup.string().required().min(1).max(50),
     postalCode: Yup.string()
       .required()

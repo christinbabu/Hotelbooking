@@ -49,6 +49,7 @@ restaurantSchema.methods.generateAuthToken = function () {
       isRestaurant: true,
       email: this.email,
       hotelId: this.hotelId,
+      name:this.name
     },
     process.env.JWT_AUTH_PRIVATE_KEY
   );

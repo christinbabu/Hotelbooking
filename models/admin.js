@@ -48,6 +48,7 @@ adminSchema.methods.generateAuthToken = function () {
       username: this.username,
       isAdmin: this.isAdmin,
       email:this.email,
+      name:this.name
     },
     process.env.JWT_AUTH_PRIVATE_KEY
   );
