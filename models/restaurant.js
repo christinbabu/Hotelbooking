@@ -86,9 +86,9 @@ function validateRestaurant(data) {
 
 function validateRestaurantPassword(data) {
   const schema = Yup.object({
-    oldPassword:Yup.string().required().min(6).max(256).label("Old Password"),
+    oldPassword:Yup.string().required().min(6).max(256).label("Admin Password"),
     newPassword: Yup.string()
-      .notOneOf([Yup.ref("oldPassword"), null], "Old Password Should not be same as new password")
+      .notOneOf([Yup.ref("oldPassword"), null], "Admin Password Should not be same as new password")
       .required("Password is required")
       .min(6)
       .max(256)

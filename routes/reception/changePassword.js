@@ -5,16 +5,20 @@ const validate = require("../../middleware/validate");
 const auth = require("../../middleware/auth");
 const bcrypt = require("bcrypt");
 const findReception = require("../../utils/findReception");
+const findAdmin = require("../../utils/findAdmin");
 const adminMiddleware = require("../../middleware/admin");
 const {Reception}=require("../../models/reception")
 
 router.post("/", [auth, adminMiddleware, validate(validateReceptionPassword)], async (req, res) => {
   const reception = await Reception.findById(req.body.receptionId);
-  console.log(reception,"rp",req.body.oldPassword)
-  let validPassword = await bcrypt.compare(req.body.oldPassword, reception.password);
+  // console.log(req.user,"recepchange")
+  // console.log(reception,"rp",req.body.oldPassword)
+  const admin=await findAdmin(req.user.username)
+  let validPassword = await bcrypt.compare(req.body.oldPassword, admin.password);
   if (!validPassword)
-    return res.status(400).send({property: "oldPassword", msg: "Old password is wrong"});
+    return res.status(400).send({property: "oldPassword", msg: "Admin password is wrong"});
 
+  // console.log("doneeee")  
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
 

@@ -63,6 +63,10 @@ const roomSchema = new mongoose.Schema({
   photos: {
     type: Array,
   },
+  isVisible:{
+    type: Boolean,
+    default: true
+  },
   hotelId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,

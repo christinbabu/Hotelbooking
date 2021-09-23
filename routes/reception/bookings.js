@@ -458,6 +458,9 @@ router.delete("/:id",[auth, receptionMiddleware], async (req, res) => {
 router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   console.log(req.body, "aa");
 
+  const result=await Booking.findById(req.params.id);
+  if(result.status!=="checkedin") return res.status(400).send("Either you already checked out or you have not checked in")
+
   req?.body?.roomNumbers.map(async roomNumber => {
     await Room.findOneAndUpdate(
       {roomNumbers: {$in: [roomNumber]}, availableRoomNumbers: {$nin: [roomNumber]}},
@@ -561,14 +564,10 @@ router.get("/completed", [auth, receptionMiddleware], async (req, res) => {
   let date = dateObj.getUTCDate();
   let year = dateObj.getUTCFullYear();
   month = month.toString();
-  if (month.length == 1) {
-    month = "0" + month;
-  }
+  if (month.length == 1) month = "0" + month;
 
   date = date.toString();
-  if (date.length == 1) {
-    date = "0" + date;
-  }
+  if (date.length == 1) date = "0" + date;
 
   newdate = year + "-" + month + "-" + date;
   let bookings;

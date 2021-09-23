@@ -1,2 +1,3 @@
 TODO: 
-early checkout
+add parking etc to facilities
+protect routes

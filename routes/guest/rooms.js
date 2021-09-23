@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
   let {roomIds, selectedDayRange,hotelId} = req.query;
   console.log(req.query)
   let hotel=await Hotel.findById(hotelId).select({extraBed:1,noOfExtraBeds:1,pricePerExtraBed:1});
-  let rooms = [await Room.find().where("_id").in(roomIds).lean()];
+  let rooms = [await Room.find().where("_id").in(roomIds).where("isVisible").eq(true).lean()];
   // console.log(rooms,"rms")
   let finalRoomsData = [];
   let allTheDays;

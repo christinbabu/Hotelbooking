@@ -30,9 +30,9 @@ router.get("/", [auth, adminMiddleware], async (req, res) => {
       mainPhoto: 1,
       numberOfBeds: 1,
       kindOfBed: 1,
+      isVisible:1
     }),
   ];
-
 
   let finalRoomsData = [];
   for (let room of rooms) {
@@ -51,7 +51,7 @@ router.get("/:id", [auth, adminMiddleware, validateObjectId], async (req, res) =
 });
 
 router.post("/", [auth, adminMiddleware, validate(validateRoom)], async (req, res) => {
-  let hotelId=req.body.hotelId
+  let hotelId = req.body.hotelId;
   if (!mongoose.Types.ObjectId.isValid(hotelId))
     return res.status(400).send({property: "toast", msg: "Invalid hotelId"});
   const hotel = await Hotel.findById(hotelId);
@@ -59,8 +59,8 @@ router.post("/", [auth, adminMiddleware, validate(validateRoom)], async (req, re
 
   createFolder(req.user.username);
   await saveImagesandGetPath(req);
-  req.body.roomNumbers=req.body.roomNumbers.split(",");
-  req.body.availableRoomNumbers=req.body.roomNumbers
+  req.body.roomNumbers = req.body.roomNumbers.split(",");
+  req.body.availableRoomNumbers = req.body.roomNumbers;
   const room = new Room(req.body);
   await room.save();
 
@@ -71,56 +71,73 @@ router.post("/", [auth, adminMiddleware, validate(validateRoom)], async (req, re
   }).select({hotelId: 1, _id: 0, basePricePerNight: 1});
 
   const startingRatePerDay = _.min(_.flattenDeep(_.map(rooms, "basePricePerNight")));
-  let startingPrices=[]
-  startingPrices.push(startingRatePerDay)
-  startingPrices.push(req.body.basePricePerNight)
-  
-  await Hotel.findByIdAndUpdate(hotelId, {$push: {hotelRooms: room._id}, startingRatePerDay: _.min(startingPrices)});
+  let startingPrices = [];
+  startingPrices.push(startingRatePerDay);
+  startingPrices.push(req.body.basePricePerNight);
+
+  await Hotel.findByIdAndUpdate(hotelId, {
+    $push: {hotelRooms: room._id},
+    startingRatePerDay: _.min(startingPrices),
+  });
   res.send(room);
 });
 
-router.put("/:id", [auth, adminMiddleware, validateObjectId, validate(validateRoom)], async (req, res) => {
-  const {hotelId} = req.body;
-  console.log("before")
-  await saveImagesandGetPath(req,method="put");
-  console.log("after")
-  req.body.roomNumbers=req.body.roomNumbers.split(",");
-  req.body.availableRoomNumbers=req.body.roomNumbers
-  const room = await Room.findByIdAndUpdate(req.params.id, req.body, {new: true});
-  if (!room) return res.status(404).send("room with given Id not found");
+router.put(
+  "/:id",
+  [auth, adminMiddleware, validateObjectId, validate(validateRoom)],
+  async (req, res) => {
+    const {hotelId} = req.body;
+    console.log("before");
+    await saveImagesandGetPath(req, (method = "put"));
+    console.log("after");
+    req.body.roomNumbers = req.body.roomNumbers.split(",");
+    req.body.availableRoomNumbers = req.body.roomNumbers;
+    const room = await Room.findByIdAndUpdate(req.params.id, req.body, {new: true});
+    if (!room) return res.status(404).send("room with given Id not found");
 
-  const hotel = await Hotel.findById(hotelId);
+    const hotel = await Hotel.findById(hotelId);
 
-  const rooms = await Room.find({
-    _id: {
-      $in: hotel.hotelRooms,
-    },
-  }).select({hotelId: 1, _id: 0, basePricePerNight: 1});
+    const rooms = await Room.find({
+      _id: {
+        $in: hotel.hotelRooms,
+      },
+    }).select({hotelId: 1, _id: 0, basePricePerNight: 1});
 
-  const startingRatePerDay = _.min(_.flattenDeep(_.map(rooms, "basePricePerNight")));
-  console.log(startingRatePerDay,"srpd")
-  let startingPrices=[]
-  startingPrices.push(startingRatePerDay)
-  startingPrices.push(hotel.startingRatePerDay)
-  console.log(startingPrices,"sp")
-  // if (
-  //   !(hotel.startingRatePerDay < startingRatePerDay) ||
-  //   !(hotel.startingRatePerDay > startingRatePerDay)
-  // )
-  console.log(_.min(startingPrices),"mn")
-    await Hotel.findByIdAndUpdate(hotelId, {startingRatePerDay:_.min(startingPrices)});
-  res.send(room);
-});
+    const startingRatePerDay = _.min(_.flattenDeep(_.map(rooms, "basePricePerNight")));
+    console.log(startingRatePerDay, "srpd");
+    let startingPrices = [];
+    startingPrices.push(startingRatePerDay);
+    startingPrices.push(hotel.startingRatePerDay);
+    console.log(startingPrices, "sp");
+    // if (
+    //   !(hotel.startingRatePerDay < startingRatePerDay) ||
+    //   !(hotel.startingRatePerDay > startingRatePerDay)
+    // )
+    console.log(_.min(startingPrices), "mn");
+    await Hotel.findByIdAndUpdate(hotelId, {startingRatePerDay: _.min(startingPrices)});
+    res.send(room);
+  }
+);
 
 router.patch("/:id", [auth, adminMiddleware, validateObjectId], async (req, res) => {
-  const room = await Room.findByIdAndUpdate(req.params.id);
+  let room = await Room.findByIdAndUpdate(req.params.id);
   if (!room) return res.status(404).send("Room with given Id not found");
-  res.send(room);
+  if (room.isVisible) {
+    room = await Room.findByIdAndUpdate(req.params.id, {$set: {isVisible: false}}, {new: true});
+  } else {
+    room = await Room.findByIdAndUpdate(req.params.id, {$set: {isVisible: true}}, {new: true});
+  }
+
+  let visibility
+  if(room?.isVisible){
+    visibility =false
+  }else{
+    visibility =true
+  }
+  res.send(visibility);
 });
 
 module.exports = router;
-
-
 
 // const convertBase64toImage = require("./convertBase64toImage");
 
@@ -130,7 +147,7 @@ module.exports = router;
 //   if(method==="put"&&req.body.isMainPhotoChanged){
 //     req.body.mainPhoto = await convertBase64toImage(req.user.username, req.body.mainPhoto);
 //   }
-  
+
 //   if(!method){
 //     req.body.mainPhoto = await convertBase64toImage(req.user.username, req.body.mainPhoto);
 //   }

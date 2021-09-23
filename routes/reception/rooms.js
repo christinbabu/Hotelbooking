@@ -18,11 +18,14 @@ router.get("/", [auth, reception], async (req, res) => {
 
   const {hotelRooms} = await Hotel.findById(req.query.hotelId);
   let rooms = [
-    await Room.find({
-      _id: {
-        $in: hotelRooms,
+    await Room.find(
+      {
+        _id: {
+          $in: hotelRooms,
+        },
       },
-    }).select({
+      {isVisible: true}
+    ).select({
       _id: 1,
       roomType: 1,
       basePricePerNight: 1,
@@ -32,7 +35,6 @@ router.get("/", [auth, reception], async (req, res) => {
       kindOfBed: 1,
     }),
   ];
-
 
   let finalRoomsData = [];
   for (let room of rooms) {
@@ -51,7 +53,7 @@ router.get("/:id", [auth, reception, validateObjectId], async (req, res) => {
 });
 
 router.post("/", [auth, reception, validate(validateRoom)], async (req, res) => {
-  let hotelId=req.body.hotelId
+  let hotelId = req.body.hotelId;
   if (!mongoose.Types.ObjectId.isValid(hotelId))
     return res.status(400).send({property: "toast", msg: "Invalid hotelId"});
   const hotel = await Hotel.findById(hotelId);
@@ -70,47 +72,54 @@ router.post("/", [auth, reception, validate(validateRoom)], async (req, res) => 
   }).select({hotelId: 1, _id: 0, basePricePerNight: 1});
 
   const startingRatePerDay = _.min(_.flattenDeep(_.map(rooms, "basePricePerNight")));
-  let startingPrices=[]
-  startingPrices.push(startingRatePerDay)
-  startingPrices.push(req.body.basePricePerNight)
-  
-  await Hotel.findByIdAndUpdate(hotelId, {$push: {hotelRooms: room._id}, startingRatePerDay: _.min(startingPrices)});
+  let startingPrices = [];
+  startingPrices.push(startingRatePerDay);
+  startingPrices.push(req.body.basePricePerNight);
+
+  await Hotel.findByIdAndUpdate(hotelId, {
+    $push: {hotelRooms: room._id},
+    startingRatePerDay: _.min(startingPrices),
+  });
   res.send(room);
 });
 
-router.put("/:id", [auth, reception, validateObjectId, validate(validateRoom)], async (req, res) => {
-  const {hotelId} = req.body;
-  await saveImagesandGetPath(req);
-  const room = await Room.findByIdAndUpdate(req.params.id, req.body, {new: true});
-  if (!room) return res.status(404).send("room with given Id not found");
+router.put(
+  "/:id",
+  [auth, reception, validateObjectId, validate(validateRoom)],
+  async (req, res) => {
+    const {hotelId} = req.body;
+    await saveImagesandGetPath(req);
+    const room = await Room.findByIdAndUpdate(req.params.id, req.body, {new: true});
+    if (!room) return res.status(404).send("room with given Id not found");
 
-  const hotel = await Hotel.findById(hotelId);
+    const hotel = await Hotel.findById(hotelId);
 
-  const rooms = await Room.find({
-    _id: {
-      $in: hotel.hotelRooms,
-    },
-  }).select({hotelId: 1, _id: 0, basePricePerNight: 1});
+    const rooms = await Room.find({
+      _id: {
+        $in: hotel.hotelRooms,
+      },
+    }).select({hotelId: 1, _id: 0, basePricePerNight: 1});
 
-  const startingRatePerDay = _.min(_.flattenDeep(_.map(rooms, "basePricePerNight")));
-  console.log(startingRatePerDay,"srpd")
-  let startingPrices=[]
-  startingPrices.push(startingRatePerDay)
-  startingPrices.push(hotel.startingRatePerDay)
-  console.log(startingPrices,"sp")
-  // if (
-  //   !(hotel.startingRatePerDay < startingRatePerDay) ||
-  //   !(hotel.startingRatePerDay > startingRatePerDay)
-  // )
-  console.log(_.min(startingPrices),"mn")
-    await Hotel.findByIdAndUpdate(hotelId, {startingRatePerDay:_.min(startingPrices)});
-  res.send(room);
-});
+    const startingRatePerDay = _.min(_.flattenDeep(_.map(rooms, "basePricePerNight")));
+    console.log(startingRatePerDay, "srpd");
+    let startingPrices = [];
+    startingPrices.push(startingRatePerDay);
+    startingPrices.push(hotel.startingRatePerDay);
+    console.log(startingPrices, "sp");
+    // if (
+    //   !(hotel.startingRatePerDay < startingRatePerDay) ||
+    //   !(hotel.startingRatePerDay > startingRatePerDay)
+    // )
+    console.log(_.min(startingPrices), "mn");
+    await Hotel.findByIdAndUpdate(hotelId, {startingRatePerDay: _.min(startingPrices)});
+    res.send(room);
+  }
+);
 
 router.delete("/:id", [auth, reception, validateObjectId], async (req, res) => {
   const room = await Room.findByIdAndDelete(req.params.id);
   if (!room) return res.status(404).send("Room with given Id not found");
-  res.send(room); 
+  res.send(room);
 });
 
 module.exports = router;
