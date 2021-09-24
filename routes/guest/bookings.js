@@ -23,6 +23,8 @@ router.get("/", [auth, guestMiddleware], async (req, res) => {
   } else {
     bookings = await Booking.find({guestId: req.user._id}).where("status").ne("checkedout").lean();
   }
+  // console.log(bookings[0])
+  if(!bookings[0]) return res.send("No bookings found")
 
   _.each(bookings, async (booking, index) => {
     const hotel = await Hotel.findById(booking.hotelId);

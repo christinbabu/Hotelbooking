@@ -57,11 +57,11 @@ router.delete("/:id", [auth, adminMiddleware, validateObjectId], async (req, res
     if(bookings) return res.status(409).send("Room Boy is currently allocated to a room, so could not delete")
 
     const deletedRoomBoy=await RoomBoy.findByIdAndRemove(req.params.id)
-    removeImage(deletedRoomBoy.photo, function (error) {
-        if(error){
-            console.log(error);
-        }
-      });
+    // removeImage(deletedRoomBoy.photo, function (error) {
+    //     if(error){
+    //         console.log(error);
+    //     }
+    //   });
     const roomBoys=await RoomBoy.find()
     res.send(roomBoys)
 });

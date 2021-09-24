@@ -51,15 +51,40 @@ router.get("/:id", [auth, adminMiddleware, validateObjectId], async (req, res) =
 });
 
 router.post("/", [auth, adminMiddleware, validate(validateRoom)], async (req, res) => {
+  req.body.roomNumbers = req.body.roomNumbers.split(",");
   let hotelId = req.body.hotelId;
+  console.log("heree")
   if (!mongoose.Types.ObjectId.isValid(hotelId))
     return res.status(400).send({property: "toast", msg: "Invalid hotelId"});
+  const {hotelRooms} = await Hotel.findById(hotelId);
+  let otherRooms = 
+    await Room.find({
+      _id: {
+        $in: hotelRooms,
+      },
+    }).select({
+      _id: 1,
+      roomNumbers:1
+    });
+
+  let duplicateRoomNumbers=[]
+  for(let room of otherRooms){
+    // if(req.body.roomNumbers in room.roomNumbers){
+    //   console.log()
+    // }
+    // console.log(room.roomNumbers,req.body.roomNumbers)
+    duplicateRoomNumbers.push(_.intersection(room.roomNumbers,req.body.roomNumbers))
+  }
+  
+  duplicateRoomNumbers=_.flattenDeep(duplicateRoomNumbers)
+  console.log(duplicateRoomNumbers,"dp")
+  if(duplicateRoomNumbers.length>0) return res.status(422).send({property:"roomNumbers",msg:`Room Numbers${duplicateRoomNumbers.toString()} are already assigned`})
+  console.log("fgb")
   const hotel = await Hotel.findById(hotelId);
   if (!hotel) return res.status(404).send("hotel with id not found");
 
   createFolder(req.user.username);
   await saveImagesandGetPath(req);
-  req.body.roomNumbers = req.body.roomNumbers.split(",");
   req.body.availableRoomNumbers = req.body.roomNumbers;
   const room = new Room(req.body);
   await room.save();
@@ -92,6 +117,32 @@ router.put(
     console.log("after");
     req.body.roomNumbers = req.body.roomNumbers.split(",");
     req.body.availableRoomNumbers = req.body.roomNumbers;
+    let {hotelRooms} = await Hotel.findById(hotelId).lean();
+    hotelRooms=hotelRooms.map(room=>room.toString());
+    console.log(hotelRooms,"hrms");
+    otherHotelRooms=_.difference(hotelRooms,[req.params.id])
+    console.log(otherHotelRooms,"hh",req.params.id);
+  let otherRooms = 
+    await Room.find({
+      _id: {
+        $in: otherHotelRooms,
+      },
+    }).select({
+      _id: 1,
+      roomNumbers:1
+    });
+
+  let duplicateRoomNumbers=[]
+  for(let room of otherRooms){
+    // if(req.body.roomNumbers in room.roomNumbers){
+    //   console.log()
+    // }
+    // console.log(room.roomNumbers,req.body.roomNumbers)
+    duplicateRoomNumbers.push(_.intersection(room.roomNumbers,req.body.roomNumbers))
+  }
+
+  duplicateRoomNumbers=_.flattenDeep(duplicateRoomNumbers)
+  if(duplicateRoomNumbers.length>0) return res.status(422).send({property:"roomNumbers",msg:`Room Numbers${duplicateRoomNumbers.toString()} are already assigned`})
     const room = await Room.findByIdAndUpdate(req.params.id, req.body, {new: true});
     if (!room) return res.status(404).send("room with given Id not found");
 
