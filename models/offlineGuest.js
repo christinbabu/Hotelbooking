@@ -46,18 +46,6 @@ offlineGuestSchema.methods.generateAuthToken = function () {
   return token;
 };
 
-offlineGuestSchema.methods.generateResetToken = function () {
-  const token = jwt.sign(
-    {
-      _id: this._id,
-      email: this.email,
-      isGuest: true,
-    },
-    process.env.JWT_CHANGEPASSWORD_PRIVATE_KEY
-  );
-  return token;
-};
-
 const OfflineGuest = mongoose.model("offlineguest", offlineGuestSchema);
 
 function validateOfflineGuest(data) {

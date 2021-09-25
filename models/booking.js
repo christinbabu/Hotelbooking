@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const Yup = require("yup");
 
-
 const bookingSchema = new mongoose.Schema({
   guestId: {
     type: mongoose.Schema.Types.ObjectId,

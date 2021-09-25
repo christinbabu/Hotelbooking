@@ -3,7 +3,7 @@ const express = require("express");
 const adminSignin = require("../routes/admin/signin");
 const adminSignup = require("../routes/admin/signup");
 const adminForgot = require("../routes/admin/forgot");
-const verify = require("../routes/admin/verify");
+// const verify = require("../routes/admin/verify");
 const adminChangePassword = require("../routes/admin/changePassword");
 const hotel=require("../routes/admin/hotels");
 const roomBoy=require("../routes/admin/roomBoy");
@@ -22,16 +22,16 @@ const guestChangePassword = require("../routes/guest/changePassword");
 
 const receptionSignin = require("../routes/reception/signin");
 const receptionSignup = require("../routes/reception/signup");
-const receptionForgot = require("../routes/reception/forgot");
+// const receptionForgot = require("../routes/reception/forgot");
 const offlineBooking=require("../routes/reception/bookings")
-const hotels = require("../routes/reception/hotels");
+// const hotels = require("../routes/reception/hotels");
 const rooms = require("../routes/admin/rooms");
 const receptionChangePassword = require("../routes/reception/changePassword");
 const offlineSignup = require("../routes/reception/offlineSignup")
 
 const restaurantSignin = require("../routes/restaurant/signin");
 const restaurantSignup = require("../routes/restaurant/signup");
-const restaurantForgot = require("../routes/restaurant/forgot");
+// const restaurantForgot = require("../routes/restaurant/forgot");
 const restaurantDetails = require("../routes/restaurant/bookings");
 const restaurantChangePassword = require("../routes/restaurant/changePassword");
 
@@ -40,7 +40,7 @@ module.exports = function (app) {
   app.use("/api/admin/signin", adminSignin);
   app.use("/api/admin/signup", adminSignup);
   app.use("/api/admin/forgot", adminForgot);
-  app.use("/api/admin/verify", verify);
+  // app.use("/api/admin/verify", verify);
   app.use("/api/admin/hotel", hotel);
   app.use("/api/admin/room", rooms);
   app.use("/api/admin/roomBoy", roomBoy);
@@ -62,14 +62,14 @@ module.exports = function (app) {
   app.use("/api/reception/signup", receptionSignup);
   app.use("/api/reception/offlinesignup", offlineSignup);
   app.use("/api/reception/booking", offlineBooking);
-  app.use("/api/reception/forgot", receptionForgot);
-  app.use("/api/reception/hotel", hotels);
-  app.use("/api/reception/room", rooms);
+  // app.use("/api/reception/forgot", receptionForgot);
+  // app.use("/api/reception/hotel", hotels);
+  // app.use("/api/reception/room", rooms);
   app.use("/api/reception/changePassword", receptionChangePassword);
 
   app.use("/api/restaurant/signin", restaurantSignin);
   app.use("/api/restaurant/signup", restaurantSignup);
-  app.use("/api/restaurant/forgot", restaurantForgot);
+  // app.use("/api/restaurant/forgot", restaurantForgot);
   app.use("/api/restaurant/booking", restaurantDetails);
   app.use("/api/restaurant/changePassword", restaurantChangePassword);
 };

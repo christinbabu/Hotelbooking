@@ -171,35 +171,3 @@ function validateHotel(data) {
 
 exports.Hotel = Hotel;
 exports.validateHotel = validateHotel;
-
-//? API post request data
-//{
-//   "hotelName":"abc",
-//   "starRating":"5",
-//   "contactName":"dvd",
-//   "phoneNumber":"914253080".
-//   "address":"rgergerge ergeger egrer",
-//   "city":"dv",
-//   "placeForSearch":"hampi"
-//   "postalCode":"458698",
-//   "parking":"No",
-//   "breakfast":"No",
-//   "facilities":["bed"],
-//   "extraBed":true,
-//   "extraBedDetails":["ac"],
-//   "mainPhoto":"http://bed",
-//   "photos":["dsd","few"],
-//   "freeCancellationAvailable":false,
-//   "ifNotCancelledBeforeDate":"scsc",
-//   "checkIn":"12:30",
-//   "checkOut":"15:4d",
-//   "accomodateChildren":true,
-//   "allowPets":false,
-//   "isPrepaymentRequired":true,
-//   "provideDormitoryForDriver":true,
-//   "GST":"false",
-//   "tradeName":"cece",
-//   "GSTIN":"wefwe",
-//   "panCardNumber":"wfwef",
-//   "state":"karnataka"
-// }

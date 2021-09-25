@@ -1,7 +1,6 @@
 const formidable = require("formidable");
 const express = require("express");
 const router = express.Router();
-
 const bcrypt = require("bcrypt");
 const auth = require("../../middleware/auth");
 const adminMiddleware = require("../../middleware/admin");
@@ -116,10 +115,10 @@ router.put(
   }
 );
 
-router.delete("/:id", [auth, adminMiddleware, validateObjectId], async (req, res) => {
-  const hotel = await Hotel.findByIdAndDelete(req.params.id);
-  if (!hotel) return res.status(404).send("hotel with given id not found");
-  res.send(hotel);
-});
+// router.delete("/:id", [auth, adminMiddleware, validateObjectId], async (req, res) => {
+//   const hotel = await Hotel.findByIdAndDelete(req.params.id);
+//   if (!hotel) return res.status(404).send("hotel with given id not found");
+//   res.send(hotel);
+// });
 
 module.exports = router;

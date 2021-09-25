@@ -28,8 +28,8 @@ router.post("/", async (req, res) => {
   res.send(token);
 });
 
-router.post("/offlineguest",async(req, res) => {
-  console.log(req.body)
-})
+// router.post("/offlineguest",async(req, res) => {
+//   console.log(req.body)
+// })
 
 module.exports = router;

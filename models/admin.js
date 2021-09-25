@@ -102,11 +102,3 @@ function validateAdminPassword(data) {
 exports.Admin = Admin;
 exports.validateAdmin = validateAdmin;
 exports.validateAdminPassword = validateAdminPassword;
-
-// {
-//   "name":"nkj",
-//   "email":"n@gmail.com",
-//   "username":"nkj",
-//   "password":"123456",
-//   "confirmpassword":"123456"
-// }

@@ -94,15 +94,4 @@ function validateRoom(data) {
 }
 
 exports.Room = Room; 
-exports.validateRoom = validateRoom; 
- 
-//? API post request data
-// {
-//   "roomType":"luxury",
-//   "numberOfRoomsOfThisType":4,
-//   "kindOfBed":"Single bed",
-//   "numberOfBeds":6,
-//   "basePricePerNight":10000,
-//   "numberOfGuestsInaRoom":10,
-//   "facilities":["acc","tv"]
-// }
+exports.validateRoom = validateRoom;

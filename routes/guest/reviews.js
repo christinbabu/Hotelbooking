@@ -115,24 +115,24 @@ router.put("/:id", [auth, guestMiddleware, validateObjectId], async (req, res) =
   res.send(review);
 });
 
-router.delete("/:id", [auth, guestMiddleware, validateObjectId], async (req, res) => {
-  const reviewId = req.params.id;
-  const review = await Review.findById(reviewId);
-  if (!review) return res.status(404).send("Review with given Id not found");
+// router.delete("/:id", [auth, guestMiddleware, validateObjectId], async (req, res) => {
+//   const reviewId = req.params.id;
+//   const review = await Review.findById(reviewId);
+//   if (!review) return res.status(404).send("Review with given Id not found");
 
-  const {reviewIds} = await Guest.findById(req.user._id);
+//   const {reviewIds} = await Guest.findById(req.user._id);
 
-  const editPermission = reviewIds.includes(reviewId);
-  if (!editPermission) return res.status(400).send("You don't have permission to delete");
+//   const editPermission = reviewIds.includes(reviewId);
+//   if (!editPermission) return res.status(400).send("You don't have permission to delete");
 
-  const deleted = await Review.findByIdAndDelete(reviewId);
-  if (!deleted) return res.status(500).send("Something went wrong at our end");
-  await Hotel.findByIdAndUpdate(review.hotelId, {$pull: {reviewIds: review._id}});
-  await Guest.findByIdAndUpdate(req.user._id, {
-    $pull: {reviewedHotelIds: review.hotelId, reviewIds: review._id},
-  });
+//   const deleted = await Review.findByIdAndDelete(reviewId);
+//   if (!deleted) return res.status(500).send("Something went wrong at our end");
+//   await Hotel.findByIdAndUpdate(review.hotelId, {$pull: {reviewIds: review._id}});
+//   await Guest.findByIdAndUpdate(req.user._id, {
+//     $pull: {reviewedHotelIds: review.hotelId, reviewIds: review._id},
+//   });
 
-  res.send(review);
-});
+//   res.send(review);
+// });
 
 module.exports = router;

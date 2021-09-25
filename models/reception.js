@@ -52,20 +52,7 @@ receptionSchema.methods.generateAuthToken = function () {
   return token;
 };
 
-receptionSchema.methods.generateResetToken = function () {
-  const token = jwt.sign(
-    {
-      _id: this._id,
-      email: this.email,
-      isreception: true,
-    },
-    process.env.JWT_CHANGEPASSWORD_PRIVATE_KEY
-  );
-  return token;
-};
-
 const Reception = mongoose.model("reception", receptionSchema);
-
 
 function validateReception(data) {
   const schema = Yup.object().shape({

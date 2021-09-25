@@ -1,7 +1,5 @@
 const express = require("express");
 const Yup = require("yup");
-
-
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
