@@ -7,7 +7,6 @@ const {Review} = require("../../models/review");
 
 router.get("/:id", [auth,guestMiddleware,validateObjectId], async (req, res) => {
   const review= await Review.findById(req.params.id)
-    console.log(review,"vv")
   res.send(review);
 });
 

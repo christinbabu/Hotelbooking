@@ -3,10 +3,10 @@ const Yup = require("yup");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
-const {validateGuest, Guest} = require("../../models/guest");
 const validate = require("../../middleware/validate");
 const auth = require("../../middleware/auth");
 const guestMiddleware = require("../../middleware/guest");
+const {validateGuest, Guest} = require("../../models/guest");
 
 router.post("/", [validate(validateGuest)], async (req, res) => {
   let email = await Guest.findOne({email: req.body.email.toLowerCase()});
@@ -58,7 +58,7 @@ router.put("/", [auth, guestMiddleware], async (req, res) => {
         if (username)
           return res.status(400).send({property: "username", msg: "Username Already Taken"});
         await Guest.findByIdAndUpdate(req.user._id, {username: newUsername});
-        res.send(await Guest.findById(req.user._id).select({name:1,email:1,username:1}));
+        res.send(await Guest.findById(req.user._id).select({name: 1, email: 1, username: 1}));
       })
       .catch(error => {
         return res.status(400).send({property: "username", msg: error.errors.toString()});
@@ -72,15 +72,12 @@ router.put("/", [auth, guestMiddleware], async (req, res) => {
       })
       .then(async () => {
         await Guest.findByIdAndUpdate(req.user._id, {name});
-        res.send(await Guest.findById(req.user._id).select({name:1,email:1,username:1}));
+        res.send(await Guest.findById(req.user._id).select({name: 1, email: 1, username: 1}));
       })
       .catch(error => {
         return res.status(400).send({property: "name", msg: error.errors.toString()});
       });
   }
-  // let result=
-  // console.log(result,"new")
-  
 });
 
 module.exports = router;

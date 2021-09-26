@@ -1,30 +1,26 @@
 const express = require("express");
 const router = express.Router();
 const _ = require("lodash");
-const mongoose = require("mongoose");
 const guestMiddleware = require("../../middleware/guest");
 const auth = require("../../middleware/auth");
-// const getDays = require("../../utils/getDays");
-const {Hotel} = require("../../models/hotel");
-const {Room} = require("../../models/room");
+const getCheckoutDate = require("../../utils/getCheckoutDate");
+const {retrieveMainPhotobyPath, retrieveMainPhoto} = require("../../utils/retrieveImages");
 const {RoomBoy} = require("../../models/roomBoy");
 const {Booking} = require("../../models/booking");
 const {Guest} = require("../../models/guest");
-const {retrieveMainPhotobyPath, retrieveMainPhoto} = require("../../utils/retrieveImages");
-const validateObjectId = require("../../middleware/validateObjectId");
-const getCheckoutDate = require("../../utils/getCheckoutDate");
+const {Hotel} = require("../../models/hotel");
+const {Room} = require("../../models/room");
 
 router.get("/", [auth, guestMiddleware], async (req, res) => {
   let finalData = [];
   let bookings;
-  console.log(req.query);
   if (req.query.isStayCompleted === "true") {
     bookings = await Booking.find({guestId: req.user._id, status: "checkedout"}).lean();
   } else {
     bookings = await Booking.find({guestId: req.user._id}).where("status").ne("checkedout").lean();
   }
-  // console.log(bookings[0])
-  if(!bookings[0]) return res.send("No bookings found")
+
+  if (!bookings[0]) return res.send("No bookings found");
 
   _.each(bookings, async (booking, index) => {
     const hotel = await Hotel.findById(booking.hotelId);
@@ -52,13 +48,6 @@ router.get("/", [auth, guestMiddleware], async (req, res) => {
       totalRooms += objectValues[0];
     }
 
-    // const hotel=await Hotel.findById(booking.hotelId)
-    // booking.roomFinalDetails.map(details=>{
-    //   if(details.selectedExtraBed){
-    //     totalNoOfExtraBeds+=details.selectedExtraBed
-    //   }
-    // })
-
     if (booking.roomFinalDetails) {
       booking.roomFinalDetails.map(details => {
         if (details.selectedExtraBed) {
@@ -78,7 +67,6 @@ router.get("/", [auth, guestMiddleware], async (req, res) => {
         checkoutAdditionalCharges += Number(item.itemPrice);
       });
     }
-    // console.log(totalNoOfExtraBeds,"te")
 
     bookings[index].additionalCharges =
       totalNoOfExtraBeds * hotel.pricePerExtraBed +
@@ -88,11 +76,6 @@ router.get("/", [auth, guestMiddleware], async (req, res) => {
     bookings[index].totalBeds = totalBeds;
     bookings[index].totalGuests = totalGuests;
     bookings[index].totalRooms = totalRooms;
-
-    // bookings[index].startingDayOfStay = new Date(bookings[index].startingDayOfStay).toLocaleString(
-    //   "en-us",
-    //   {day: "numeric", month: "long", year: "numeric"}
-    // );
     bookings[index].startingDayOfStay = booking[index]?.lateStartingDayOfStay
       ? new Date(bookings[index]?.lateStartingDayOfStay).toLocaleString("en-us", {
           day: "numeric",
@@ -115,11 +98,6 @@ router.get("/", [auth, guestMiddleware], async (req, res) => {
           month: "long",
           year: "numeric",
         });
-    
-    // bookings[index].endingDayOfStay = new Date(bookings[index].endingDayOfStay).toLocaleString(
-    //   "en-us",
-    //   {day: "numeric", month: "long", year: "numeric"}
-    // );
     finalData.push(bookings[index]);
     if (index == bookings.length - 1) {
       sendData();
@@ -127,7 +105,6 @@ router.get("/", [auth, guestMiddleware], async (req, res) => {
   });
 
   function sendData() {
-    console.log("sending");
     res.send(finalData);
   }
 });
@@ -145,7 +122,6 @@ router.get("/guest", [auth, guestMiddleware], async (req, res) => {
 });
 
 router.get("/downloadInvoice/:id", [auth, guestMiddleware], async (req, res) => {
-  console.log(req.params.id, "rpi");
   const booking = await Booking.findById(req.params.id);
   if (booking.status !== "checkedout") return res.status(400).send("Something went wrong");
   let hotel = await Hotel.findById(booking.hotelId);
@@ -193,49 +169,9 @@ router.get("/downloadInvoice/:id", [auth, guestMiddleware], async (req, res) => 
   guest["accomodationTotal"] = accomodationTotal;
   guest["extraBedTotal"] = extraBedTotal;
   guest["inputFields"] = inputFields;
-  guest["endingDayOfStay"] = booking?.earlyEndingDayOfStay||booking?.endingDayOfStay;
+  guest["endingDayOfStay"] = booking?.earlyEndingDayOfStay || booking?.endingDayOfStay;
   guest["roomDetails"] = roomDetails;
   res.send(guest);
 });
 
 module.exports = router;
-
-// const [hotels,setHotels]=useState()
-//   const [isLoading,setIsLoading]=useState(true)
-//   const [hotelsCount,setHotelsCount]=useState()
-//   const [didPaginate,setDidPaginate]=useState()
-
-//   let pageSize=9
-
-//   async function getHotels() {
-//     let values={pageNumber:0,pageSize}
-//     const {data}=await getRenterHotels(values)
-//     let {hotelsCount,hotels}=data
-//     console.log(hotelsCount,"count")
-//     setHotels(hotels)
-//     setHotelsCount(hotelsCount)
-//     setIsLoading(false)
-//   }
-
-//   useEffect(() => {
-//     getHotels()
-//   },[]);
-
-//   if(isLoading){
-//     return (
-//       <center>
-//           <ReactLoading
-//             type={"bars"}
-//             color={"#F39636"}
-//             height={"10%"}
-//             width={"50%"}
-//           />
-//         </center>
-//     )
-//   }
-
-//   return (
-//     <div>
-//       <SearchResultComponent user="renter" hotels={hotels} />
-//     </div>
-//   );

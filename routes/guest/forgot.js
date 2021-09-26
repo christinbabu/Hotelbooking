@@ -4,12 +4,11 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const findGuest = require("../../utils/findGuest");
 const validate = require("../../middleware/validate");
-const {validateGuestPassword} = require("../../models/guest");
 const resetPasswordMail = require("../../services/resetPasswordMail");
+const {validateGuestPassword} = require("../../models/guest");
 const {encrypt, decrypt} = require("../../utils/encryption");
 
 router.post("/", async (req, res) => {
-  console.log("here")
   let {userId} = req.body;
   let guest = await findGuest(userId);
   if (!guest)
@@ -23,7 +22,6 @@ router.post("/", async (req, res) => {
   guest.resettoken = encryptedResetToken;
   await guest.save();
   resetPasswordMail(guest["email"], resetToken, guest?.name);
-  console.log(resetToken);
   res.send("Link Sent Successfully");
 });
 
@@ -39,7 +37,6 @@ router.put("/:token", validate(validateGuestPassword), async (req, res) => {
 
   let guest = await findGuest(decoded.email);
   if (!guest) return res.status(400).send("Something went wrong. Try again");
-
   if (!guest.resettoken) return res.status(400).send("This link is invalid");
 
   let decryptedResetToken = decrypt(guest.resettoken);
