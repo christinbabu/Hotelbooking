@@ -2,19 +2,21 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
-const {validateRestaurant, Restaurant} = require("../../models/restaurant");
 const validate = require("../../middleware/validate");
 const auth = require("../../middleware/auth");
 const adminMiddleware = require("../../middleware/admin");
 const Yup = require("yup");
-const { Hotel } = require("../../models/hotel");
+const {validateRestaurant, Restaurant} = require("../../models/restaurant");
+const {Hotel} = require("../../models/hotel");
 
 router.post("/", [validate(validateRestaurant)], async (req, res) => {
-  let hotel= await Hotel.findById(req.body.hotelId);
-  if(!hotel) return res.status(400).send({property: "toast", msg: "There is no hotel with given ID"});
+  let hotel = await Hotel.findById(req.body.hotelId);
+  if (!hotel)
+    return res.status(400).send({property: "toast", msg: "There is no hotel with given ID"});
 
   let hotelId = await Restaurant.findOne({hotelId: req.body.hotelId});
-  if (hotelId) return res.status(400).send({property: "toast", msg: "Restaurant account already created"});
+  if (hotelId)
+    return res.status(400).send({property: "toast", msg: "Restaurant account already created"});
 
   let email = await Restaurant.findOne({email: req.body.email.toLowerCase()});
   if (email) return res.status(400).send({property: "email", msg: "Email Already Registered"});
@@ -32,13 +34,12 @@ router.post("/", [validate(validateRestaurant)], async (req, res) => {
   req.body.email = req.body.email.toLowerCase();
   req.body.username = req.body.username.toLowerCase();
 
-  let restaurantData = _.pick(req.body, ["name", "email", "username", "password","hotelId"]);
-
+  let restaurantData = _.pick(req.body, ["name", "email", "username", "password", "hotelId"]);
   const restaurant = new Restaurant(restaurantData);
   await restaurant.save();
-  await Hotel.findByIdAndUpdate(req.body.hotelId, {restaurantId:restaurant._id})
-  const token = restaurant.generateAuthToken();
 
+  await Hotel.findByIdAndUpdate(req.body.hotelId, {restaurantId: restaurant._id});
+  const token = restaurant.generateAuthToken();
   res.send(token);
 });
 
@@ -67,7 +68,9 @@ router.put("/", [auth, adminMiddleware], async (req, res) => {
         if (username)
           return res.status(400).send({property: "username", msg: "Username Already Taken"});
         await Restaurant.findByIdAndUpdate(req.body.restaurantId, {username: newUsername});
-        res.send(await Restaurant.findById(req.body.restaurantId).select({name: 1, email: 1, username: 1}));
+        res.send(
+          await Restaurant.findById(req.body.restaurantId).select({name: 1, email: 1, username: 1})
+        );
       })
       .catch(error => {
         return res.status(400).send({property: "username", msg: error.errors.toString()});
@@ -81,13 +84,13 @@ router.put("/", [auth, adminMiddleware], async (req, res) => {
       })
       .then(async () => {
         await Restaurant.findByIdAndUpdate(req.body.restaurantId, {name});
-        res.send(await Restaurant.findById(req.body.restaurantId).select({name: 1, email: 1, username: 1}));
+        res.send(
+          await Restaurant.findById(req.body.restaurantId).select({name: 1, email: 1, username: 1})
+        );
       })
       .catch(error => {
         return res.status(400).send({property: "name", msg: error.errors.toString()});
       });
   }
-  // let result=
-  // console.log(result,"new")
 });
 module.exports = router;
