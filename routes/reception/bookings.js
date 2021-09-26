@@ -5,16 +5,8 @@ const mongoose = require("mongoose");
 const receptionMiddleware = require("../../middleware/reception");
 const auth = require("../../middleware/auth");
 const getDays = require("../../utils/getDays");
-const {Hotel} = require("../../models/hotel");
-const {Room} = require("../../models/room");
-const {RoomBoy} = require("../../models/roomBoy");
-const {Booking, validateBooking} = require("../../models/booking");
 const days = require("days-in-a-row");
 const JSJoda = require("js-joda");
-const {Guest} = require("../../models/guest");
-const {retrieveMainPhotobyPath, retrieveMainPhoto} = require("../../utils/retrieveImages");
-const validateObjectId = require("../../middleware/validateObjectId");
-const {OfflineGuest} = require("../../models/offlineGuest");
 const convertBase64toImage = require("../../utils/convertBase64toImage");
 const createFolder = require("../../utils/createFolder");
 const validate = require("../../middleware/validate");
@@ -25,6 +17,13 @@ const checkinMail = require("../../services/checkinMail");
 const checkinMessage = require("../../services/checkinMessage");
 const checkoutMail = require("../../services/checkoutMail");
 const checkoutMessage = require("../../services/checkoutMessage");
+const {retrieveMainPhotobyPath, retrieveMainPhoto} = require("../../utils/retrieveImages");
+const {Booking, validateBooking} = require("../../models/booking");
+const {OfflineGuest} = require("../../models/offlineGuest");
+const {RoomBoy} = require("../../models/roomBoy");
+const {Guest} = require("../../models/guest");
+const {Hotel} = require("../../models/hotel");
+const {Room} = require("../../models/room");
 
 router.get("/", [auth, receptionMiddleware], async (req, res) => {
   let finalData = [];
@@ -61,7 +60,6 @@ router.get("/", [auth, receptionMiddleware], async (req, res) => {
     bookings[index].totalBeds = totalBeds;
     bookings[index].totalGuests = totalGuests;
     bookings[index].totalRooms = totalRooms;
-
     bookings[index].startingDayOfStay = new Date(bookings[index].startingDayOfStay).toLocaleString(
       "en-us",
       {day: "numeric", month: "long", year: "numeric"}
@@ -85,7 +83,6 @@ router.get("/guest", [auth, receptionMiddleware], async (req, res) => {
   const {roomIds} = req.query;
   let finalRoomsData = [];
   let rooms = [await Room.find().where("_id").in(roomIds).lean()];
-
   for (let room of rooms) {
     finalRoomsData.push(await retrieveMainPhoto(room));
   }
@@ -96,21 +93,16 @@ router.get("/guest", [auth, receptionMiddleware], async (req, res) => {
 router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
   var dateObj = new Date();
   let date = dateObj.getUTCDate();
-  let month = dateObj.getUTCMonth() + 1; //months from 1-12
+  let month = dateObj.getUTCMonth() + 1;
   let year = dateObj.getUTCFullYear();
 
   date = date.toString();
-  if (date.length == 1) {
-    date = "0" + date;
-  }
-
   month = month.toString();
-  if (month.length == 1) {
-    month = "0" + month;
-  }
+
+  if (date.length == 1) date = "0" + date;
+  if (month.length == 1) month = "0" + month;
 
   newdate = year + "-" + month + "-" + date;
-  console.log(newdate);
   const bookings = await Booking.find()
     .where("hotelId")
     .in(req.user.hotelId)
@@ -122,7 +114,6 @@ router.get("/todays", [auth, receptionMiddleware], async (req, res) => {
   if (!bookings[0]) return res.status(404).send("No bookings for today");
 
   let finalData = [];
-
   for (i = 0; i < bookings.length; i++) {
     let guest = await Guest.findById(bookings[i].guestId);
     if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
@@ -144,18 +135,14 @@ router.get("/upcoming", [auth, receptionMiddleware], async (req, res) => {
   }
 
   var dateObj = new Date();
-  let month = dateObj.getUTCMonth() + 1; //months from 1-12
+  let month = dateObj.getUTCMonth() + 1;
   let date = dateObj.getUTCDate();
   let year = dateObj.getUTCFullYear();
   month = month.toString();
-  if (month.length == 1) {
-    month = "0" + month;
-  }
-
   date = date.toString();
-  if (date.length == 1) {
-    date = "0" + date;
-  }
+
+  if (month.length == 1) month = "0" + month;
+  if (date.length == 1) date = "0" + date;
 
   newdate = year + "-" + month + "-" + date;
   let bookings;
@@ -168,8 +155,8 @@ router.get("/upcoming", [auth, receptionMiddleware], async (req, res) => {
   } else {
     bookings = await Booking.find().where("startingDayOfStay").gt(newdate).lean();
   }
-  if (!bookings[0]) return res.status(404).send("No bookings available");
 
+  if (!bookings[0]) return res.status(404).send("No bookings available");
   let finalData = [];
 
   for (i = 0; i < bookings.length; i++) {
@@ -186,11 +173,9 @@ router.get("/upcoming", [auth, receptionMiddleware], async (req, res) => {
 
 router.get("/staying", [auth, receptionMiddleware], async (req, res) => {
   bookings = await Booking.find().where("status").eq("checkedin").lean();
-
   if (!bookings[0]) return res.status(404).send("No bookings available");
 
   let finalData = [];
-
   for (i = 0; i < bookings.length; i++) {
     let guest = await Guest.findById(bookings[i].guestId);
     if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
@@ -204,14 +189,11 @@ router.get("/staying", [auth, receptionMiddleware], async (req, res) => {
 });
 
 router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
-  //bugfix
   const booking = await Booking.findById(req.params.id).lean();
-  console.log("test", req.params.id);
   let extraBed;
   for (let [key, value] of Object.entries(booking.roomDetails)) {
     const room = await Room.findById(key);
 
-    console.log(room, "rm");
     _.assign(value, _.pick(room, ["roomType", "availableRoomNumbers"]));
     const hotel = await Hotel.findById(room.hotelId).select({
       extraBed: 1,
@@ -222,17 +204,16 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
     if (hotel.extraBed) {
       value["pricePerExtraBed"] = hotel.pricePerExtraBed;
       value["noOfExtraBeds"] = hotel.noOfExtraBeds;
-      console.log(hotel.extraBed, "he");
       extraBed = hotel.extraBed;
     }
   }
 
   const roomBoys = await RoomBoy.find({currentHotelId: booking.hotelId}).select({name: 1});
-  console.log(roomBoys, "rbs");
 
   let guest;
   guest = await Guest.findById(booking.guestId);
   if (!guest) guest = await OfflineGuest.findById(booking.guestId);
+
   _.assign(booking, _.pick(guest, ["name", "phoneNumber", "email"]));
   let roomFinalDetails = [];
   for (let [key, value] of Object.entries(booking.roomDetails)) {
@@ -240,14 +221,11 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
       value["roomNumber"] = "Select Room Number";
       value["roomBoy"] = "Select Room Boy";
       value["selectedExtraBed"] = 0;
-      // value["adults"]=0
-      // value["children"]=0
-      // let tempObject={}
       value["roomId"] = key;
-      // tempObject[key+index]=value
       roomFinalDetails.push(value);
     });
   }
+
   booking["roomFinalDetails"] = roomFinalDetails;
   booking["identityProof"] = "";
   booking["identityProofNumber"] = "";
@@ -256,7 +234,6 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
   booking["roomBoys"] = roomBoys;
   booking["extraBed"] = extraBed;
   booking["endingDayOfStay"] = getCheckoutDate(booking["endingDayOfStay"]);
-  console.log(booking, "vv");
   res.send(booking);
 });
 
@@ -265,33 +242,26 @@ router.post(
   [auth, receptionMiddleware, validate(validateBooking)],
   async (req, res) => {
     createFolder(req.user.email);
-
     var dateObj = new Date();
-  let month = dateObj.getUTCMonth() + 1; //months from 1-12
-  let date = dateObj.getUTCDate();
-  let year = dateObj.getUTCFullYear();
-  month = month.toString();
-  if (month.length == 1) {
-    month = "0" + month;
-  }
+    let month = dateObj.getUTCMonth() + 1;
+    let date = dateObj.getUTCDate();
+    let year = dateObj.getUTCFullYear();
+    month = month.toString();
+    date = date.toString();
 
-  date = date.toString();
-  if (date.length == 1) {
-    date = "0" + date;
-  }
+    if (month.length == 1) month = "0" + month;
+    if (date.length == 1) date = "0" + date;
 
-  newdate = year + "-" + month + "-" + date;
-// console.log(req.body,"nji")
-  req.body.startingDayOfStay=req.body.startingDayOfStay.replace(/\//g,"-")
+    newdate = year + "-" + month + "-" + date;
+    req.body.startingDayOfStay = req.body.startingDayOfStay.replace(/\//g, "-");
 
     req.body.identityProof = await convertBase64toImage(req.user.email, req.body.identityProof);
     for (let data of req.body.roomFinalDetails) {
       await Room.findByIdAndUpdate(data.roomId, {
         $pull: {availableRoomNumbers: {$in: [data.roomNumber]}},
       });
+    }
 
-      // await RoomBoy.findByIdAndUpdate(data.roomBoyId,{$push:{}})
-    } 
     let checkinRoomDetails = [];
     req.body.roomFinalDetails.map(details =>
       checkinRoomDetails.push(
@@ -314,7 +284,7 @@ router.post(
           roomFinalDetails: checkinRoomDetails,
           identityProof: req.body.identityProof,
           identityProofNumber: req.body.identityProofNumber,
-          lateStartingDayOfStay:newdate!==req.body.startingDayOfStay?newdate:null
+          lateStartingDayOfStay: newdate !== req.body.startingDayOfStay ? newdate : null,
         },
       },
       {new: true}
@@ -326,13 +296,8 @@ router.post(
     guest["phoneNumber"] = req.body.phoneNumber;
     guest["address"] = req.body.address;
     guest.save().then(() => {
-      if (guest.email) {
-        checkinMail(guest.email, booking);
-      }
-
-      if (guest.phoneNumber) {
-        checkinMessage(booking, guest.phoneNumber);
-      }
+      if (guest.email) checkinMail(guest.email, booking);
+      if (guest.phoneNumber) checkinMessage(booking, guest.phoneNumber);
     });
 
     res.send("done");
@@ -342,12 +307,14 @@ router.post(
 router.get("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   const booking = await Booking.findById(req.params.id);
   if (booking.status !== "checkedin") return res.status(400).send("Something went wrong");
+
   let hotel = await Hotel.findById(booking.hotelId);
   let price = 0;
   let accomodationTotal = 0;
   let extraBedTotal = 0;
   let roomNumbers = [];
   let roomDetails = [];
+
   for (let data of booking.roomFinalDetails) {
     let object = {};
     roomNumbers.push(data.roomNumber);
@@ -365,15 +332,14 @@ router.get("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   }
 
   let restaurantBillAmount = 0;
-
   booking.restaurantBill.map(item => {
     restaurantBillAmount += item.itemPrice * item.itemQuantity;
   });
 
   price += restaurantBillAmount + accomodationTotal;
-
   let guest = await Guest.findById(booking.guestId).lean();
   if (!guest) guest = await OfflineGuest.findById(booking.guestId).lean();
+
   guest["price"] = price;
   guest["restaurantBillAmount"] = restaurantBillAmount;
   guest["accomodationTotal"] = accomodationTotal;
@@ -383,13 +349,12 @@ router.get("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   res.send(guest);
 });
 
-router.delete("/:id",[auth, receptionMiddleware], async (req, res) => {
-  const data=await Booking.findById(req.params.id)
-  if(data.status!=="yettostay") return res.status(400).send("Cancellation revoked!")
+router.delete("/:id", [auth, receptionMiddleware], async (req, res) => {
+  const data = await Booking.findById(req.params.id);
+  if (data.status !== "yettostay") return res.status(400).send("Cancellation revoked!");
 
   const LocalDate = JSJoda.LocalDate;
   const booking = await Booking.findByIdAndDelete(req.params.id);
-  console.log(booking, "bkng");
   const start_date = new LocalDate.parse(booking.startingDayOfStay);
   const end_date = new LocalDate.parse(booking.endingDayOfStay);
 
@@ -397,15 +362,14 @@ router.delete("/:id",[auth, receptionMiddleware], async (req, res) => {
     new Date(booking.startingDayOfStay),
     JSJoda.ChronoUnit.DAYS.between(start_date, end_date) + 1
   );
-  console.log(totalDays, "td");
+
   for (let [key, value] of Object.entries(booking.roomDetails)) {
-    console.log(key, "ky");
     const room = await Room.findById(key);
     totalDays.map(day => {
       room.numberOfBookingsByDate[day] =
         room?.numberOfBookingsByDate[day] - value.numberOfRoomsBooked;
     });
-    
+
     room.bookingFullDates = _.difference(room.bookingFullDates, totalDays);
     room.markModified("numberOfBookingsByDate", "bookingFullDates");
     await room.save();
@@ -413,32 +377,24 @@ router.delete("/:id",[auth, receptionMiddleware], async (req, res) => {
 
   var dateObj = new Date();
   let date = dateObj.getUTCDate();
-  let month = dateObj.getUTCMonth() + 1; //months from 1-12
+  let month = dateObj.getUTCMonth() + 1;
   let year = dateObj.getUTCFullYear();
 
   date = date.toString();
-  if (date.length == 1) {
-    date = "0" + date;
-  }
-
   month = month.toString();
-  if (month.length == 1) {
-    month = "0" + month;
-  }
+
+  if (date.length == 1) date = "0" + date;
+  if (month.length == 1) month = "0" + month;
 
   newdate = year + "-" + month + "-" + date;
-  console.log(newdate);
   const bookings = await Booking.find()
     .where("hotelId")
     .in(booking.hotelId)
     .where("startingDayOfStay")
     .eq(newdate)
-    // .where("startingDayOfStay")
-    // .lt(newdate)
     .where("status")
     .eq("yettostay")
     .lean();
-  // if (!bookings[0]) return res.status(404).send("No bookings for today");
 
   let finalData = [];
 
@@ -452,14 +408,12 @@ router.delete("/:id",[auth, receptionMiddleware], async (req, res) => {
     finalData.push(bookings[i]);
   }
   res.send(finalData);
-  // res.send("Successfully cancelled booking");
 });
 
 router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
-  console.log(req.body, "aa");
-
-  const result=await Booking.findById(req.params.id);
-  if(result.status!=="checkedin") return res.status(400).send("Either you already checked out or you have not checked in")
+  const result = await Booking.findById(req.params.id);
+  if (result.status !== "checkedin")
+    return res.status(400).send("Either you already checked out or you have not checked in");
 
   req?.body?.roomNumbers.map(async roomNumber => {
     await Room.findOneAndUpdate(
@@ -467,7 +421,7 @@ router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
       {$push: {availableRoomNumbers: roomNumber}}
     );
   });
-  // console.log(room,"room")
+
   const booking = await Booking.findByIdAndUpdate(
     req.params.id,
     {$set: {status: "checkedout", additionalCharges: req.body.items}},
@@ -475,39 +429,29 @@ router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
   );
 
   var dateObj = new Date();
-  let month = dateObj.getUTCMonth() + 1; //months from 1-12
+  let month = dateObj.getUTCMonth() + 1;
   let date = dateObj.getUTCDate();
   let year = dateObj.getUTCFullYear();
   month = month.toString();
-  if (month.length == 1) {
-    month = "0" + month;
-  }
-
   date = date.toString();
-  if (date.length == 1) {
-    date = "0" + date;
-  }
+
+  if (month.length == 1) month = "0" + month;
+  if (date.length == 1) date = "0" + date;
 
   newdate = year + "-" + month + "-" + date;
-
-  // const booking = await Booking.findById(req.params.id)
   const LocalDate = JSJoda.LocalDate;
 
   function getNumberOfDays(start, end) {
     const start_date = new LocalDate.parse(start);
     const end_date = new LocalDate.parse(end);
-
     return JSJoda.ChronoUnit.DAYS.between(start_date, end_date);
   }
 
   var num = getNumberOfDays(booking.startingDayOfStay, booking.endingDayOfStay);
-
   let allTheDays = days(new Date(newdate), num + 1);
-  console.log(allTheDays, "ad");
 
   if (allTheDays[0]) {
     for (let [key, value] of Object.entries(booking.roomDetails)) {
-      console.log(key, "ky");
       const room = await Room.findById(key);
       allTheDays.map(day => {
         room.numberOfBookingsByDate[day] =
@@ -526,7 +470,6 @@ router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
     await Guest.findByIdAndUpdate(booking.guestId, {
       $pull: {bookedHotelDetails: {$in: [booking.hotelId]}},
     });
-
     await Guest.findByIdAndUpdate(booking.guestId, {
       $push: {previousBookedHotelDetails: booking.hotelId},
     });
@@ -537,17 +480,13 @@ router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
     await OfflineGuest.findByIdAndUpdate(booking.guestId, {
       $pull: {bookedHotelDetails: {$in: [booking.hotelId]}},
     });
-
     await OfflineGuest.findByIdAndUpdate(booking.guestId, {
       $push: {previousBookedHotelDetails: booking.hotelId},
     });
   }
-  if (guest.email) {
-    await checkoutMail(guest.email, booking);
-  }
-  if (guest.phoneNumber) {
-    await checkoutMessage(booking, guest.phoneNumber);
-  }
+
+  if (guest.email) await checkoutMail(guest.email, booking);
+  if (guest.phoneNumber) await checkoutMessage(booking, guest.phoneNumber);
   res.send("done");
 });
 
@@ -560,13 +499,13 @@ router.get("/completed", [auth, receptionMiddleware], async (req, res) => {
   }
 
   var dateObj = new Date();
-  let month = dateObj.getUTCMonth() + 1; //months from 1-12
+  let month = dateObj.getUTCMonth() + 1;
   let date = dateObj.getUTCDate();
   let year = dateObj.getUTCFullYear();
   month = month.toString();
-  if (month.length == 1) month = "0" + month;
-
   date = date.toString();
+
+  if (month.length == 1) month = "0" + month;
   if (date.length == 1) date = "0" + date;
 
   newdate = year + "-" + month + "-" + date;
@@ -582,10 +521,9 @@ router.get("/completed", [auth, receptionMiddleware], async (req, res) => {
   } else {
     bookings = await Booking.find().where("status").eq("checkedout").lean();
   }
+
   if (!bookings[0]) return res.status(404).send("No bookings available");
-
   let finalData = [];
-
   for (i = 0; i < bookings.length; i++) {
     let guest = await Guest.findById(bookings[i].guestId);
     if (!guest) guest = await OfflineGuest.findById(bookings[i].guestId);
@@ -624,7 +562,6 @@ router.get("/downloadInvoice/:id", [auth, receptionMiddleware], async (req, res)
   }
 
   let restaurantBillAmount = 0;
-
   booking.restaurantBill.map(item => {
     restaurantBillAmount += item.itemPrice * item.itemQuantity;
   });
@@ -638,7 +575,6 @@ router.get("/downloadInvoice/:id", [auth, receptionMiddleware], async (req, res)
   });
 
   price += restaurantBillAmount + accomodationTotal + extraBedTotal + extraAdditionalCharges;
-
   let guest = await Guest.findById(booking.guestId).lean();
   if (!guest) guest = await OfflineGuest.findById(booking.guestId).lean();
   guest["price"] = price;
@@ -646,7 +582,7 @@ router.get("/downloadInvoice/:id", [auth, receptionMiddleware], async (req, res)
   guest["accomodationTotal"] = accomodationTotal;
   guest["extraBedTotal"] = extraBedTotal;
   guest["inputFields"] = inputFields;
-  guest["endingDayOfStay"] = booking?.earlyEndingDayOfStay||booking?.endingDayOfStay;
+  guest["endingDayOfStay"] = booking?.earlyEndingDayOfStay || booking?.endingDayOfStay;
   guest["roomDetails"] = roomDetails;
   res.send(guest);
 });
@@ -654,6 +590,7 @@ router.get("/downloadInvoice/:id", [auth, receptionMiddleware], async (req, res)
 router.post("/", [auth, receptionMiddleware], async (req, res) => {
   const {roomDetails, selectedDayRange, hotelId, offlineGuestId} = req.body;
   if (!mongoose.Types.ObjectId.isValid(hotelId)) return res.status(404).send("Invalid hotel Id");
+
   for (room of roomDetails) {
     if (!mongoose.Types.ObjectId.isValid(room.roomId))
       return res.status(404).send("Invalid room Id");
@@ -661,19 +598,15 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
 
   const allTheDays = getDays(selectedDayRange);
   const roomsDetails = {};
-  // let totalPrice = 0;
 
   for (room of roomDetails) {
     let roomDB = await Room.findById(room.roomId);
-
     roomsDetails[room.roomId] = {
       numberOfRoomsBooked: room.noOfRooms,
       pricePerRoom: roomDB.basePricePerNight,
       beds: roomDB.numberOfBeds,
       guests: roomDB.numberOfGuestsInaRoom,
     };
-
-    // totalPrice += roomDB.basePricePerNight * room.noOfRooms;
 
     for (date of allTheDays) {
       if (!roomDB?.numberOfBookingsByDate) roomDB.numberOfBookingsByDate = {};
@@ -691,13 +624,11 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
           return res.status(400).send("Someone already booked, please refresh your page.");
       }
     }
-
     roomDB.markModified("numberOfBookingsByDate", "bookingFullDates");
     await roomDB.save();
   }
 
   const bookingsCount = await Booking.find().count();
-
   const roomData = {};
   roomData["guestId"] = offlineGuestId;
   roomData["hotelId"] = hotelId;
@@ -711,8 +642,7 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
   roomData["roomDetails"] = roomsDetails;
   roomData["bookingMode"] = "offline";
   roomData["hotelBookingId"] = "" + Math.floor(Math.random() * (99 - 10 + 1) + 10) + bookingsCount;
-  roomData["linkReviewId"]=""+Math.floor(Math.random() * (999 - 100 + 1) + 100)+Date.now()
-  // roomData["totalPrice"] = totalPrice;
+  roomData["linkReviewId"] = "" + Math.floor(Math.random() * (999 - 100 + 1) + 100) + Date.now();
 
   const booking = new Booking(roomData);
   await booking.save();
@@ -720,12 +650,11 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
   const offlineGuestData = await OfflineGuest.findByIdAndUpdate(offlineGuestId, {
     $push: {bookedHotelDetails: booking._id},
   });
-  if (offlineGuestData.email) {
+
+  if (offlineGuestData.email)
     await bookedMail(offlineGuestData.email, booking, offlineGuestData.name);
-  }
-  if (offlineGuestData.phoneNumber) {
+  if (offlineGuestData.phoneNumber)
     await bookedMessage(booking.hotelBookingId, offlineGuestData.phoneNumber);
-  }
   res.send("Successfully booked");
 });
 
