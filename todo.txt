@@ -1,7 +1,5 @@
 TODO: 
-add parking etc to facilities
-protect routes
-loading component when submit etc clicked.
+offline guest booked hotel details suspicion
 
 1. artefact
 2. innocent

@@ -1,6 +1,6 @@
-const Yup = require("yup");
+const {Decimal128} = require("mongoose");
 const mongoose = require("mongoose");
-const { Decimal128 } = require("mongoose");
+const Yup = require("yup");
 
 const hotelSchema = new mongoose.Schema({
   hotelName: {
@@ -53,11 +53,11 @@ const hotelSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
   },
-  description:{
-    type:String,
-    required:true,
-    minlength:120,
-    maxlength:160
+  description: {
+    type: String,
+    required: true,
+    minlength: 120,
+    maxlength: 160,
   },
   facilities: {
     type: Array,
@@ -146,7 +146,7 @@ function validateHotel(data) {
       .length(12)
       .matches(/^[0-9]+$/, "Mobile number must include only numbers"),
     address: Yup.string().required().min(8).max(255),
-    description:Yup.string().required().min(120).max(160),
+    description: Yup.string().required().min(120).max(160),
     city: Yup.string().required().min(1).max(50),
     postalCode: Yup.string()
       .required()

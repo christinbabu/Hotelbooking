@@ -14,12 +14,12 @@ const roomSchema = new mongoose.Schema({
     min: 1,
     max: 9999,
   },
-  roomNumbers:{
-    type:Array,
+  roomNumbers: {
+    type: Array,
     required: true,
   },
-  availableRoomNumbers:{
-    type:Array,
+  availableRoomNumbers: {
+    type: Array,
     required: true,
   },
   kindOfBed: {
@@ -46,7 +46,7 @@ const roomSchema = new mongoose.Schema({
   },
   facilities: {
     type: Array,
-    required:true
+    required: true,
   },
   bookingFullDates: {
     type: Array,
@@ -63,9 +63,9 @@ const roomSchema = new mongoose.Schema({
   photos: {
     type: Array,
   },
-  isVisible:{
+  isVisible: {
     type: Boolean,
-    default: true
+    default: true,
   },
   hotelId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -79,10 +79,10 @@ function validateRoom(data) {
   const schema = Yup.object().shape({
     roomType: Yup.string().min(1).max(50).required(),
     numberOfRoomsOfThisType: Yup.number().min(1).max(9999).required(),
-    roomNumbers:Yup.string().required().matches(/^[0-9,]+$/,"Only number seperated by commas allowed"),
-    kindOfBed: Yup.string()
+    roomNumbers: Yup.string()
       .required()
-      .oneOf(["Single bed", "Double bed"]),
+      .matches(/^[0-9,]+$/, "Only number seperated by commas allowed"),
+    kindOfBed: Yup.string().required().oneOf(["Single bed", "Double bed"]),
     numberOfBeds: Yup.number().min(1).max(10).required(),
     basePricePerNight: Yup.number().min(10).max(2500000).required(),
     numberOfGuestsInaRoom: Yup.number().min(1).max(50),
@@ -93,5 +93,5 @@ function validateRoom(data) {
   return schema.validate(data);
 }
 
-exports.Room = Room; 
+exports.Room = Room;
 exports.validateRoom = validateRoom;

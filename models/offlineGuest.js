@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const Yup = require("yup");
 const jwt = require("jsonwebtoken");
+const Yup = require("yup");
 
 const offlineGuestSchema = new mongoose.Schema({
   name: {
@@ -23,11 +23,11 @@ const offlineGuestSchema = new mongoose.Schema({
   },
   address: {
     type: String,
-    default:null
+    default: null,
   },
   phoneNumber: {
     type: String,
-    required:true,
+    required: true,
     minlength: 5,
     maxlength: 50,
   },
@@ -38,7 +38,7 @@ offlineGuestSchema.methods.generateAuthToken = function () {
     {
       _id: this._id,
       username: this.username,
-      name:this.name,
+      name: this.name,
       isGuest: true,
     },
     process.env.JWT_AUTH_PRIVATE_KEY

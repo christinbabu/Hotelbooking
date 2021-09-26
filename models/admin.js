@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
-const Yup=require("yup")
+const Yup = require("yup");
 
 const adminSchema = new mongoose.Schema({
   email: {
@@ -35,10 +35,10 @@ const adminSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  hotels:{
+  hotels: {
     type: Array,
-    default:[]
-  }
+    default: [],
+  },
 });
 
 adminSchema.methods.generateAuthToken = function () {
@@ -47,8 +47,8 @@ adminSchema.methods.generateAuthToken = function () {
       _id: this._id,
       username: this.username,
       isAdmin: this.isAdmin,
-      email:this.email,
-      name:this.name
+      email: this.email,
+      name: this.name,
     },
     process.env.JWT_AUTH_PRIVATE_KEY
   );
@@ -69,7 +69,6 @@ adminSchema.methods.generateResetToken = function () {
 
 const Admin = mongoose.model("admin", adminSchema);
 
-
 function validateAdmin(data) {
   const schema = Yup.object().shape({
     name: Yup.string().min(2).max(50).required("Name is required").label("Name"),
@@ -86,7 +85,7 @@ function validateAdmin(data) {
 
 function validateAdminPassword(data) {
   const schema = Yup.object({
-    oldPassword:Yup.string().required().min(6).max(256).label("Old Password"),
+    oldPassword: Yup.string().required().min(6).max(256).label("Old Password"),
     newPassword: Yup.string()
       .notOneOf([Yup.ref("oldPassword"), null], "Old Password Should not be same as new password")
       .required("Password is required")

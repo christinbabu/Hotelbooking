@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const Yup = require("yup");
 const jwt = require("jsonwebtoken");
+const Yup = require("yup");
 
 const receptionSchema = new mongoose.Schema({
   name: {
@@ -44,8 +44,8 @@ receptionSchema.methods.generateAuthToken = function () {
       username: this.username,
       isReception: true,
       email: this.email,
-      hotelId:this.hotelId,
-      name:this.name
+      hotelId: this.hotelId,
+      name: this.name,
     },
     process.env.JWT_AUTH_PRIVATE_KEY
   );
@@ -70,7 +70,7 @@ function validateReception(data) {
 
 function validateReceptionPassword(data) {
   const schema = Yup.object({
-    oldPassword:Yup.string().required().min(6).max(256).label("Admin Password"),
+    oldPassword: Yup.string().required().min(6).max(256).label("Admin Password"),
     newPassword: Yup.string()
       .notOneOf([Yup.ref("oldPassword"), null], "Admin Password Should not be same as new password")
       .required("Password is required")

@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Yup = require("yup");
-const jwt = require("jsonwebtoken");
 
 const roomBoySchema = new mongoose.Schema({
   name: {
@@ -15,11 +14,11 @@ const roomBoySchema = new mongoose.Schema({
     minlength: 8,
     maxlength: 255,
   },
-  city:{
-    type:String,
-    required:true,
-    min:1,
-    max:50
+  city: {
+    type: String,
+    required: true,
+    min: 1,
+    max: 50,
   },
   phoneNumber: {
     type: String,
@@ -45,10 +44,10 @@ const roomBoySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  currentHotelId:{
-    type:mongoose.Schema.Types.ObjectId,
-    required:true
-  }
+  currentHotelId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+  },
 });
 
 const RoomBoy = mongoose.model("roomboy", roomBoySchema);
@@ -59,15 +58,17 @@ function validateRoomBoy(data) {
     phoneNumber: Yup.string()
       .required()
       .length(12)
-      .matches(/^[0-9]+$/, "Mobile number must include only numbers").label("Mobile Number"),
+      .matches(/^[0-9]+$/, "Mobile number must include only numbers")
+      .label("Mobile Number"),
     address: Yup.string().required().min(8).max(255),
     city: Yup.string().required().min(1).max(50),
     aadharNumber: Yup.string()
       .required()
       .length(12)
-      .matches(/^[0-9]+$/, "Aadhar Number must include only numbers").label("Aadhar Number"),
+      .matches(/^[0-9]+$/, "Aadhar Number must include only numbers")
+      .label("Aadhar Number"),
     photo: Yup.mixed().required(),
-    currentHotelId: Yup.string().required()
+    currentHotelId: Yup.string().required(),
   });
   return schema.validate(data);
 }

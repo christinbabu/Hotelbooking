@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const Yup = require("yup");
 const jwt = require("jsonwebtoken");
+const Yup = require("yup");
 
 const guestSchema = new mongoose.Schema({
   name: {
@@ -23,13 +23,13 @@ const guestSchema = new mongoose.Schema({
   },
   address: {
     type: String,
-    default:null
+    default: null,
   },
   phoneNumber: {
     type: String,
     minlength: 5,
     maxlength: 50,
-    default:null
+    default: null,
   },
   password: {
     type: String,
@@ -49,14 +49,14 @@ const guestSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
-  reviewedHotelIds:{
-    type:Array,
-    default:[]
+  reviewedHotelIds: {
+    type: Array,
+    default: [],
   },
-  reviewIds:{
-    type:Array,
-    default:[]
-  }
+  reviewIds: {
+    type: Array,
+    default: [],
+  },
 });
 
 guestSchema.methods.generateAuthToken = function () {
@@ -64,9 +64,9 @@ guestSchema.methods.generateAuthToken = function () {
     {
       _id: this._id,
       username: this.username,
-      name:this.name,
+      name: this.name,
       isGuest: true,
-      email:this.email
+      email: this.email,
     },
     process.env.JWT_AUTH_PRIVATE_KEY
   );
@@ -103,7 +103,7 @@ function validateGuest(data) {
 
 function validateGuestPassword(data) {
   const schema = Yup.object({
-    oldPassword:Yup.string().required().min(6).max(256).label("Old Password"),
+    oldPassword: Yup.string().required().min(6).max(256).label("Old Password"),
     newPassword: Yup.string()
       .notOneOf([Yup.ref("oldPassword"), null], "Old Password Should not be same as new password")
       .required("Password is required")

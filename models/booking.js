@@ -46,17 +46,17 @@ const bookingSchema = new mongoose.Schema({
     type: Object,
     required: true,
   },
-  restaurantBill:{
-    type:Array,
-    default:null
+  restaurantBill: {
+    type: Array,
+    default: null,
   },
   roomFinalDetails: {
     type: Array,
     default: null,
   },
-  additionalCharges:{
-    type:Array,
-    default:null,
+  additionalCharges: {
+    type: Array,
+    default: null,
   },
   bookedOn: {
     type: String,
@@ -69,12 +69,12 @@ const bookingSchema = new mongoose.Schema({
   bookingMode: {
     type: String,
   },
-  hotelBookingId:{
-    type:String,
+  hotelBookingId: {
+    type: String,
     required: true,
   },
-  linkReviewId:{
-    type:String,
+  linkReviewId: {
+    type: String,
     required: true,
   },
   status: {
