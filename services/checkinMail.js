@@ -1,46 +1,37 @@
 const nodemailer = require("nodemailer");
 const JSJoda = require("js-joda");
-const days = require("days-in-a-row");
 const getCheckoutDate = require("../utils/getCheckoutDate");
-let LocalDate=JSJoda.LocalDate
+let LocalDate = JSJoda.LocalDate;
 
-module.exports = function (userEmail, booking, userName) {
+module.exports = function (userEmail, booking) {
+  let guests = 0;
+  booking.roomFinalDetails.map(data => {
+    guests += Number(data.adults);
+    guests += Number(data.children);
+  });
 
-    let guests=0
-
-    booking.roomFinalDetails.map(data=>{
-        guests+=Number(data.adults)
-        guests+=Number(data.children)
-    })
-
-    totalPrice = 0;
-    totalBeds = 0;
-    totalRooms = 0;
-    for (let [key, value] of Object.entries(booking.roomDetails)) {
-      let objectValues = [];
-      for (const [key1, value1] of Object.entries(value)) {
-        objectValues.push(value1);
-      }
-      totalPrice += objectValues[0] * objectValues[1];
-      totalBeds += objectValues[0] * objectValues[2];
-      totalRooms += objectValues[0];
+  totalPrice = 0;
+  totalBeds = 0;
+  totalRooms = 0;
+  for (let [key, value] of Object.entries(booking.roomDetails)) {
+    let objectValues = [];
+    for (const [key1, value1] of Object.entries(value)) {
+      objectValues.push(value1);
     }
+    totalPrice += objectValues[0] * objectValues[1];
+    totalBeds += objectValues[0] * objectValues[2];
+    totalRooms += objectValues[0];
+  }
 
-    
-    const start_date = new LocalDate.parse(booking.startingDayOfStay);
-  const end_date = new LocalDate.parse(booking.endingDayOfStay);
-  
-  const totalDays =
-    JSJoda.ChronoUnit.DAYS.between(start_date, end_date) + 1
-  
-  booking.startingDayOfStay=new Date(booking.startingDayOfStay).toLocaleString(
-      "en-us",
-      {day: "numeric", month: "long", year: "numeric"}
-    );
-  booking.endingDayOfStay=new Date(getCheckoutDate(booking.endingDayOfStay)).toLocaleString(
-      "en-us",
-      {day: "numeric", month: "long", year: "numeric"}
-    );
+  booking.startingDayOfStay = new Date(booking.startingDayOfStay).toLocaleString("en-us", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  booking.endingDayOfStay = new Date(getCheckoutDate(booking.endingDayOfStay)).toLocaleString(
+    "en-us",
+    {day: "numeric", month: "long", year: "numeric"}
+  );
 
   const transporter = nodemailer.createTransport({
     host: "smtp.ethereal.email",
@@ -1085,7 +1076,8 @@ module.exports = function (userEmail, booking, userName) {
                                       padding-left: 20px;
                                     "
                                   >
-                                    ${booking.roomFinalDetails.map(details=>(`<table
+                                    ${booking.roomFinalDetails.map(
+                                      details => `<table
                                         border="0"
                                         class="es-table cke_show_border"
                                         cellspacing="1"
@@ -1103,15 +1095,20 @@ module.exports = function (userEmail, booking, userName) {
                                           <td style="padding: 0; margin: 0; font-size: 13px">
                                             Room&nbsp;Number&nbsp;:&nbsp;
                                           </td>
-                                          <td style="padding: 0; margin: 0; font-size: 13px">${details.roomNumber}</td>
+                                          <td style="padding: 0; margin: 0; font-size: 13px">${
+                                            details.roomNumber
+                                          }</td>
                                         </tr>
                                         <tr>
                                           <td style="padding: 0; margin: 0; font-size: 13px">
                                             Guests
                                           </td>
-                                          <td style="padding: 0; margin: 0; font-size: 13px">${Number(details.adults)+Number(details.children)}</td>
+                                          <td style="padding: 0; margin: 0; font-size: 13px">${
+                                            Number(details.adults) + Number(details.children)
+                                          }</td>
                                         </tr>
-                                      </table>`))}
+                                      </table>`
+                                    )}
                                   </td>
                                 </tr>
                               </table>
@@ -1532,8 +1529,6 @@ module.exports = function (userEmail, booking, userName) {
     </div>
   </body>
 </html>
-
-    
     `,
   };
 
@@ -1542,9 +1537,3 @@ module.exports = function (userEmail, booking, userName) {
     console.log("Email sent: " + info.response);
   });
 };
-
-
-// <h2>Hello ${userName}</h2>
-//         <p>               Click the below link to reset your password.</p>
-//        <h4></h4><a href=http://localhost:3800/api/${resetToken}>${resetToken}</a></h4>
-//         <h3><b>Regards, HotelBook Group</b></h3>

@@ -1284,9 +1284,3 @@ module.exports = function (userEmail, resetToken, userName) {
     console.log("Email sent: " + info.response);
   });
 };
-
-
-// <h2>Hello ${userName}</h2>
-//         <p>               Click the below link to reset your password.</p>
-//        <h4></h4><a href=http://localhost:3800/api/${resetToken}>${resetToken}</a></h4>
-//         <h3><b>Regards, HotelBook Group</b></h3>
