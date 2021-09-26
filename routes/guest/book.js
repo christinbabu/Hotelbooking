@@ -16,9 +16,9 @@ const JSJoda = require("js-joda");
 const bookedMail = require("../../services/bookedMail");
 
 router.get("/", async (req, res) => {
-  let {placeForSearch, selectedDayRange, pageNumber, pageSize, filterOptions, hotelId} = req.query;
-  pageNumber = Number(pageNumber);
-  pageSize = Number(pageSize);
+  let {placeForSearch, selectedDayRange,hotelId} = req.query;
+  // pageNumber = Number(pageNumber);
+  // pageSize = Number(pageSize);
   console.log(placeForSearch, "ps");
   console.log(selectedDayRange, "ps");
   // placeForSearch = placeForSearch.toLowerCase();

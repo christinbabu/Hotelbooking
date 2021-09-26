@@ -14,9 +14,6 @@ const {retrieveMainPhoto, retrieveOtherPhotos} = require("../../utils/retrieveIm
 const saveImagesandGetPath = require("../../utils/saveImagesandGetPath");
 
 router.get("/", [auth, adminMiddleware], async (req, res) => {
-  let {pageNumber, pageSize} = req.query;
-  pageNumber = Number(pageNumber);
-  pageSize = Number(pageSize);
 
   console.log("back",req.user.username)
   let hotels
@@ -29,8 +26,8 @@ router.get("/", [auth, adminMiddleware], async (req, res) => {
       $in: hotels,
     },
   }).select({_id: 1, hotelName: 1, mainPhoto: 1, city: 1, startingRatePerDay: 1,receptionId:1,restaurantId:1,reviewScore:1,description:1})
-    .skip(pageNumber * pageSize)
-    .limit(pageSize);
+    // .skip(pageNumber * pageSize)
+    // .limit(pageSize);
 
   hotel = await retrieveMainPhoto(hotel);
 
