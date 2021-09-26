@@ -2,11 +2,11 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
-const {validateAdmin, Admin} = require("../../models/admin");
 const validate = require("../../middleware/validate");
-const Yup=require("yup");
+const Yup = require("yup");
 const auth = require("../../middleware/auth");
 const adminMiddleware = require("../../middleware/admin");
+const {validateAdmin, Admin} = require("../../models/admin");
 
 router.post("/", [validate(validateAdmin)], async (req, res) => {
   let email = await Admin.findOne({email: req.body.email.toLowerCase()});
@@ -23,10 +23,9 @@ router.post("/", [validate(validateAdmin)], async (req, res) => {
   req.body.username = req.body.username.toLowerCase();
 
   let adminData = _.pick(req.body, ["name", "email", "username", "password"]);
-  console.log(adminData);
   const admin = new Admin(adminData);
   await admin.save();
-  const token=admin.generateAuthToken()
+  const token = admin.generateAuthToken();
   res.send(token);
 });
 
@@ -75,8 +74,6 @@ router.put("/", [auth, adminMiddleware], async (req, res) => {
         return res.status(400).send({property: "name", msg: error.errors.toString()});
       });
   }
-  // let result=
-  // console.log(result,"new")
 });
 
 module.exports = router;

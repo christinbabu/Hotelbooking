@@ -4,8 +4,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const findAdmin = require("../../utils/findAdmin");
 const validate = require("../../middleware/validate");
-const {validateAdminPassword} = require("../../models/admin");
 const resetPasswordMail = require("../../services/resetPasswordMail");
+const {validateAdminPassword} = require("../../models/admin");
 const {encrypt, decrypt} = require("../../utils/encryption");
 
 router.post("/", async (req, res) => {
@@ -22,7 +22,6 @@ router.post("/", async (req, res) => {
   admin.resettoken = encryptedResetToken;
   await admin.save();
   resetPasswordMail(admin["email"], resetToken, admin?.name);
-  console.log(resetToken);
   res.send("Link Sent Successfully");
 });
 
