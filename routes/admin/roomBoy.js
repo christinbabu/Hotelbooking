@@ -9,7 +9,7 @@ const convertBase64toImage = require("../../utils/convertBase64toImage");
 const {validateRoomBoy, RoomBoy} = require("../../models/roomBoy");
 const {retrieveMainPhotobyPath} = require("../../utils/retrieveImages");
 const {Booking} = require("../../models/booking");
-// const removeImage = require("../../utils/deleteFolder");
+const removeImage = require("../../utils/deleteFolder");
 
 router.get("/", [auth, adminMiddleware], async (req, res) => {
   const roomBoys = await RoomBoy.find({currentHotelId: req.query.hotelId});
@@ -54,11 +54,11 @@ router.delete("/:id", [auth, adminMiddleware, validateObjectId], async (req, res
     return res.status(409).send("Room Boy is currently allocated to a room, so could not delete");
 
   const deletedRoomBoy = await RoomBoy.findByIdAndRemove(req.params.id);
-  // removeImage(deletedRoomBoy.photo, function (error) {
-  //     if(error){
-  //         console.log(error);
-  //     }
-  //   });
+  removeImage(deletedRoomBoy.photo, function (error) {
+      if(error){
+          console.log(error);
+      }
+    });
   const roomBoys = await RoomBoy.find();
   res.send(roomBoys);
 });
