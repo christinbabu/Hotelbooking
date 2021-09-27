@@ -1,15 +1,2 @@
 TODO: 
-offline guest booked hotel details suspicion
-
-1. artefact
-2. innocent
-3. scheme
-4. chimney
-5. olympic
-6. hen
-7. allow
-8. push
-9. author
-10. occur
-11. stadium
-12. injury
+offline guest booked hotel details suspicion in db

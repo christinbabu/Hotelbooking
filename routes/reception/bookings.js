@@ -648,7 +648,7 @@ router.post("/", [auth, receptionMiddleware], async (req, res) => {
   await booking.save();
 
   const offlineGuestData = await OfflineGuest.findByIdAndUpdate(offlineGuestId, {
-    $push: {bookedHotelDetails: booking._id},
+    $push: {bookedHotelDetails: booking.hotelId},
   });
 
   if (offlineGuestData.email)
