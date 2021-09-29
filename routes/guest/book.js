@@ -104,7 +104,9 @@ router.post("/", [auth, guestMiddleware], async (req, res) => {
   const newBooking = new Booking(roomData);
   await newBooking.save();
 
-  await Guest.findByIdAndUpdate(req.user._id, {$push: {bookedHotelDetails: newBooking.hotelId}});
+  await Guest.findByIdAndUpdate(req.user._id, {
+    $push: {bookedHotelDetails: newBooking.hotelId},
+  });
   await bookedMail(req.user.email, newBooking, req.user.name);
   res.send("Successfully booked");
 });

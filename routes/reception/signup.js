@@ -12,20 +12,43 @@ const {Hotel} = require("../../models/hotel");
 router.post("/", [validate(validateReception)], async (req, res) => {
   let hotel = await Hotel.findById(req.body.hotelId);
   if (!hotel)
-    return res.status(400).send({property: "toast", msg: "There is no hotel with given ID"});
+    return res.status(400).send({
+      property: "toast",
+      msg: "There is no hotel with given ID",
+    });
 
-  let hotelId = await Reception.findOne({hotelId: req.body.hotelId});
+  let hotelId = await Reception.findOne({
+    hotelId: req.body.hotelId,
+  });
   if (hotelId)
-    return res.status(400).send({property: "toast", msg: "Reception account already created"});
+    return res.status(400).send({
+      property: "toast",
+      msg: "Reception account already created",
+    });
 
-  let email = await Reception.findOne({email: req.body.email.toLowerCase()});
-  if (email) return res.status(400).send({property: "email", msg: "Email Already Registered"});
+  let email = await Reception.findOne({
+    email: req.body.email.toLowerCase(),
+  });
+  if (email)
+    return res.status(400).send({
+      property: "email",
+      msg: "Email Already Registered",
+    });
 
-  let username = await Reception.findOne({username: req.body.username.toLowerCase()});
-  if (username) return res.status(400).send({property: "username", msg: "Username Already Taken"});
+  let username = await Reception.findOne({
+    username: req.body.username.toLowerCase(),
+  });
+  if (username)
+    return res.status(400).send({
+      property: "username",
+      msg: "Username Already Taken",
+    });
 
   if (req.body.password !== req.body.confirmPassword)
-    return res.status(400).send({property: "confirmPassword", msg: "Passwords doesn't Match'"});
+    return res.status(400).send({
+      property: "confirmPassword",
+      msg: "Passwords doesn't Match'",
+    });
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -37,7 +60,9 @@ router.post("/", [validate(validateReception)], async (req, res) => {
   let receptionData = _.pick(req.body, ["name", "email", "username", "password", "hotelId"]);
   const reception = new Reception(receptionData);
   await reception.save();
-  await Hotel.findByIdAndUpdate(req.body.hotelId, {receptionId: reception._id});
+  await Hotel.findByIdAndUpdate(req.body.hotelId, {
+    receptionId: reception._id,
+  });
   const token = reception.generateAuthToken();
   res.send(token);
 });
@@ -63,16 +88,30 @@ router.put("/", [auth, adminMiddleware], async (req, res) => {
         username: newUsername,
       })
       .then(async () => {
-        let username = await Reception.findOne({username: newUsername});
+        let username = await Reception.findOne({
+          username: newUsername,
+        });
         if (username)
-          return res.status(400).send({property: "username", msg: "Username Already Taken"});
-        await Reception.findByIdAndUpdate(req.body.receptionId, {username: newUsername});
+          return res.status(400).send({
+            property: "username",
+            msg: "Username Already Taken",
+          });
+        await Reception.findByIdAndUpdate(req.body.receptionId, {
+          username: newUsername,
+        });
         res.send(
-          await Reception.findById(req.body.receptionId).select({name: 1, email: 1, username: 1})
+          await Reception.findById(req.body.receptionId).select({
+            name: 1,
+            email: 1,
+            username: 1,
+          })
         );
       })
       .catch(error => {
-        return res.status(400).send({property: "username", msg: error.errors.toString()});
+        return res.status(400).send({
+          property: "username",
+          msg: error.errors.toString(),
+        });
       });
   }
 
@@ -82,13 +121,22 @@ router.put("/", [auth, adminMiddleware], async (req, res) => {
         name,
       })
       .then(async () => {
-        await Reception.findByIdAndUpdate(req.body.receptionId, {name});
+        await Reception.findByIdAndUpdate(req.body.receptionId, {
+          name,
+        });
         res.send(
-          await Reception.findById(req.body.receptionId).select({name: 1, email: 1, username: 1})
+          await Reception.findById(req.body.receptionId).select({
+            name: 1,
+            email: 1,
+            username: 1,
+          })
         );
       })
       .catch(error => {
-        return res.status(400).send({property: "name", msg: error.errors.toString()});
+        return res.status(400).send({
+          property: "name",
+          msg: error.errors.toString(),
+        });
       });
   }
 });

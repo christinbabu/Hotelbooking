@@ -7,7 +7,11 @@ const guestMiddleware = require("../../middleware/guest");
 const {Guest} = require("../../models/guest");
 
 router.get("/", [auth, guestMiddleware], async (req, res) => {
-  let result = await Guest.findById(req.user._id).select({name: 1, email: 1, username: 1});
+  let result = await Guest.findById(req.user._id).select({
+    name: 1,
+    email: 1,
+    username: 1,
+  });
   if (!result) return res.status(400).send("User not found");
   res.send(result);
 });

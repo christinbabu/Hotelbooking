@@ -9,11 +9,23 @@ const adminMiddleware = require("../../middleware/admin");
 const {validateAdmin, Admin} = require("../../models/admin");
 
 router.post("/", [validate(validateAdmin)], async (req, res) => {
-  let email = await Admin.findOne({email: req.body.email.toLowerCase()});
-  if (email) return res.status(400).send({property: "email", msg: "Email Already Registered"});
+  let email = await Admin.findOne({
+    email: req.body.email.toLowerCase(),
+  });
+  if (email)
+    return res.status(400).send({
+      property: "email",
+      msg: "Email Already Registered",
+    });
 
-  let username = await Admin.findOne({username: req.body.username.toLowerCase()});
-  if (username) return res.status(400).send({property: "username", msg: "Username Already Taken"});
+  let username = await Admin.findOne({
+    username: req.body.username.toLowerCase(),
+  });
+  if (username)
+    return res.status(400).send({
+      property: "username",
+      msg: "Username Already Taken",
+    });
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -50,14 +62,30 @@ router.put("/", [auth, adminMiddleware], async (req, res) => {
         username: newUsername,
       })
       .then(async () => {
-        let username = await Admin.findOne({username: newUsername});
+        let username = await Admin.findOne({
+          username: newUsername,
+        });
         if (username)
-          return res.status(400).send({property: "username", msg: "Username Already Taken"});
-        await Admin.findByIdAndUpdate(req.user._id, {username: newUsername});
-        res.send(await Admin.findById(req.user._id).select({name: 1, email: 1, username: 1}));
+          return res.status(400).send({
+            property: "username",
+            msg: "Username Already Taken",
+          });
+        await Admin.findByIdAndUpdate(req.user._id, {
+          username: newUsername,
+        });
+        res.send(
+          await Admin.findById(req.user._id).select({
+            name: 1,
+            email: 1,
+            username: 1,
+          })
+        );
       })
       .catch(error => {
-        return res.status(400).send({property: "username", msg: error.errors.toString()});
+        return res.status(400).send({
+          property: "username",
+          msg: error.errors.toString(),
+        });
       });
   }
 
@@ -68,10 +96,19 @@ router.put("/", [auth, adminMiddleware], async (req, res) => {
       })
       .then(async () => {
         await Admin.findByIdAndUpdate(req.user._id, {name});
-        res.send(await Admin.findById(req.user._id).select({name: 1, email: 1, username: 1}));
+        res.send(
+          await Admin.findById(req.user._id).select({
+            name: 1,
+            email: 1,
+            username: 1,
+          })
+        );
       })
       .catch(error => {
-        return res.status(400).send({property: "name", msg: error.errors.toString()});
+        return res.status(400).send({
+          property: "name",
+          msg: error.errors.toString(),
+        });
       });
   }
 });

@@ -34,7 +34,9 @@ router.get("/fooditems", [auth, restaurantMiddleware], async (req, res) => {
 });
 
 router.post("/fooditems", [auth, restaurantMiddleware], async (req, res) => {
-  await Restaurant.findByIdAndUpdate(req.user._id, {$set: {items: req.body.items}});
+  await Restaurant.findByIdAndUpdate(req.user._id, {
+    $set: {items: req.body.items},
+  });
   res.send("done");
 });
 

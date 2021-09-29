@@ -12,7 +12,7 @@ router.get("/", [auth, adminMiddleware], async (req, res) => {
     email: 1,
     username: 1,
   });
-  
+
   if (!result) return res.status(400).send("User not found");
   res.send(result);
 });

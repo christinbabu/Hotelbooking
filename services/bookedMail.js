@@ -28,7 +28,11 @@ module.exports = function (userEmail, booking) {
   });
   booking.endingDayOfStay = new Date(getCheckoutDate(booking.endingDayOfStay)).toLocaleString(
     "en-us",
-    {day: "numeric", month: "long", year: "numeric"}
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }
   );
 
   const transporter = nodemailer.createTransport({

@@ -30,9 +30,15 @@ router.get("/", [auth, receptionMiddleware], async (req, res) => {
   let bookings;
 
   if (req.query.isStayCompleted === "true") {
-    bookings = await Booking.find({guestId: req.user._id, isStayCompleted: true}).lean();
+    bookings = await Booking.find({
+      guestId: req.user._id,
+      isStayCompleted: true,
+    }).lean();
   } else {
-    bookings = await Booking.find({guestId: req.user._id, isStayCompleted: false}).lean();
+    bookings = await Booking.find({
+      guestId: req.user._id,
+      isStayCompleted: false,
+    }).lean();
   }
 
   _.each(bookings, async (booking, index) => {
@@ -62,11 +68,19 @@ router.get("/", [auth, receptionMiddleware], async (req, res) => {
     bookings[index].totalRooms = totalRooms;
     bookings[index].startingDayOfStay = new Date(bookings[index].startingDayOfStay).toLocaleString(
       "en-us",
-      {day: "numeric", month: "long", year: "numeric"}
+      {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }
     );
     bookings[index].endingDayOfStay = new Date(bookings[index].endingDayOfStay).toLocaleString(
       "en-us",
-      {day: "numeric", month: "long", year: "numeric"}
+      {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }
     );
     finalData.push(bookings[index]);
     if (index == bookings.length - 1) {
@@ -208,7 +222,9 @@ router.get("/details/:id", [auth, receptionMiddleware], async (req, res) => {
     }
   }
 
-  const roomBoys = await RoomBoy.find({currentHotelId: booking.hotelId}).select({name: 1});
+  const roomBoys = await RoomBoy.find({
+    currentHotelId: booking.hotelId,
+  }).select({name: 1});
 
   let guest;
   guest = await Guest.findById(booking.guestId);
@@ -417,14 +433,22 @@ router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
 
   req?.body?.roomNumbers.map(async roomNumber => {
     await Room.findOneAndUpdate(
-      {roomNumbers: {$in: [roomNumber]}, availableRoomNumbers: {$nin: [roomNumber]}},
+      {
+        roomNumbers: {$in: [roomNumber]},
+        availableRoomNumbers: {$nin: [roomNumber]},
+      },
       {$push: {availableRoomNumbers: roomNumber}}
     );
   });
 
   const booking = await Booking.findByIdAndUpdate(
     req.params.id,
-    {$set: {status: "checkedout", additionalCharges: req.body.items}},
+    {
+      $set: {
+        status: "checkedout",
+        additionalCharges: req.body.items,
+      },
+    },
     {new: true}
   );
 
@@ -462,7 +486,9 @@ router.post("/checkout/:id", [auth, receptionMiddleware], async (req, res) => {
       room.markModified("numberOfBookingsByDate", "bookingFullDates");
       await room.save();
     }
-    await Booking.findByIdAndUpdate(req.params.id, {$set: {earlyEndingDayOfStay: newdate}});
+    await Booking.findByIdAndUpdate(req.params.id, {
+      $set: {earlyEndingDayOfStay: newdate},
+    });
   }
 
   let guest = await Guest.findById(booking.guestId).lean();

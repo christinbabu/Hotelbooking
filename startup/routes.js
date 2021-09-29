@@ -4,14 +4,14 @@ const adminSignin = require("../routes/admin/signin");
 const adminSignup = require("../routes/admin/signup");
 const adminForgot = require("../routes/admin/forgot");
 const adminChangePassword = require("../routes/admin/changePassword");
-const hotel=require("../routes/admin/hotels");
-const roomBoy=require("../routes/admin/roomBoy");
+const hotel = require("../routes/admin/hotels");
+const roomBoy = require("../routes/admin/roomBoy");
 
 const guestSignin = require("../routes/guest/signin");
 const guestSignup = require("../routes/guest/signup");
 const guestForgot = require("../routes/guest/forgot");
 const book = require("../routes/guest/book");
-const getHotels=require("../routes/guest/getHotelsName")
+const getHotels = require("../routes/guest/getHotelsName");
 const bookings = require("../routes/guest/bookings");
 const getrooms = require("../routes/guest/rooms");
 const reviews = require("../routes/guest/reviews");
@@ -21,10 +21,10 @@ const guestChangePassword = require("../routes/guest/changePassword");
 
 const receptionSignin = require("../routes/reception/signin");
 const receptionSignup = require("../routes/reception/signup");
-const offlineBooking=require("../routes/reception/bookings")
+const offlineBooking = require("../routes/reception/bookings");
 const rooms = require("../routes/admin/rooms");
 const receptionChangePassword = require("../routes/reception/changePassword");
-const offlineSignup = require("../routes/reception/offlineSignup")
+const offlineSignup = require("../routes/reception/offlineSignup");
 
 const restaurantSignin = require("../routes/restaurant/signin");
 const restaurantSignup = require("../routes/restaurant/signup");
@@ -32,7 +32,7 @@ const restaurantDetails = require("../routes/restaurant/bookings");
 const restaurantChangePassword = require("../routes/restaurant/changePassword");
 
 module.exports = function (app) {
-  app.use(express.json({limit: '50mb'}));
+  app.use(express.json({limit: "50mb"}));
   app.use("/api/admin/signin", adminSignin);
   app.use("/api/admin/signup", adminSignup);
   app.use("/api/admin/forgot", adminForgot);

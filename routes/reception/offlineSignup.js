@@ -6,8 +6,12 @@ const receptionMiddleware = require("../../middleware/reception");
 const {validateOfflineGuest, OfflineGuest} = require("../../models/offlineGuest");
 
 router.get("/", [auth, receptionMiddleware], async (req, res) => {
-  let email = await OfflineGuest.findOne({email: req.query.userId.toLowerCase()});
-  let mobile = await OfflineGuest.findOne({phoneNumber: req.query.userId});
+  let email = await OfflineGuest.findOne({
+    email: req.query.userId.toLowerCase(),
+  });
+  let mobile = await OfflineGuest.findOne({
+    phoneNumber: req.query.userId,
+  });
 
   let userId;
   if (email) userId = email._id;
@@ -17,11 +21,23 @@ router.get("/", [auth, receptionMiddleware], async (req, res) => {
 });
 
 router.post("/", [auth, receptionMiddleware, validate(validateOfflineGuest)], async (req, res) => {
-  let email = await OfflineGuest.findOne({email: req.body.email.toLowerCase()});
-  if (email) return res.status(400).send({property: "email", msg: "Email Already Registered"});
+  let email = await OfflineGuest.findOne({
+    email: req.body.email.toLowerCase(),
+  });
+  if (email)
+    return res.status(400).send({
+      property: "email",
+      msg: "Email Already Registered",
+    });
 
-  let mobile = await OfflineGuest.findOne({phoneNumber: req.body.phoneNumber});
-  if (mobile) return res.status(400).send({property: "phoneNumber", msg: "Mobile Already Exist"});
+  let mobile = await OfflineGuest.findOne({
+    phoneNumber: req.body.phoneNumber,
+  });
+  if (mobile)
+    return res.status(400).send({
+      property: "phoneNumber",
+      msg: "Mobile Already Exist",
+    });
 
   req.body.email = req.body.email.toLowerCase();
   const offlineGuest = new OfflineGuest(req.body);

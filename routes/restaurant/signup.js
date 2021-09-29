@@ -12,20 +12,43 @@ const {Hotel} = require("../../models/hotel");
 router.post("/", [validate(validateRestaurant)], async (req, res) => {
   let hotel = await Hotel.findById(req.body.hotelId);
   if (!hotel)
-    return res.status(400).send({property: "toast", msg: "There is no hotel with given ID"});
+    return res.status(400).send({
+      property: "toast",
+      msg: "There is no hotel with given ID",
+    });
 
-  let hotelId = await Restaurant.findOne({hotelId: req.body.hotelId});
+  let hotelId = await Restaurant.findOne({
+    hotelId: req.body.hotelId,
+  });
   if (hotelId)
-    return res.status(400).send({property: "toast", msg: "Restaurant account already created"});
+    return res.status(400).send({
+      property: "toast",
+      msg: "Restaurant account already created",
+    });
 
-  let email = await Restaurant.findOne({email: req.body.email.toLowerCase()});
-  if (email) return res.status(400).send({property: "email", msg: "Email Already Registered"});
+  let email = await Restaurant.findOne({
+    email: req.body.email.toLowerCase(),
+  });
+  if (email)
+    return res.status(400).send({
+      property: "email",
+      msg: "Email Already Registered",
+    });
 
-  let username = await Restaurant.findOne({username: req.body.username.toLowerCase()});
-  if (username) return res.status(400).send({property: "username", msg: "Username Already Taken"});
+  let username = await Restaurant.findOne({
+    username: req.body.username.toLowerCase(),
+  });
+  if (username)
+    return res.status(400).send({
+      property: "username",
+      msg: "Username Already Taken",
+    });
 
   if (req.body.password !== req.body.confirmPassword)
-    return res.status(400).send({property: "confirmPassword", msg: "Passwords doesn't Match'"});
+    return res.status(400).send({
+      property: "confirmPassword",
+      msg: "Passwords doesn't Match'",
+    });
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -38,7 +61,9 @@ router.post("/", [validate(validateRestaurant)], async (req, res) => {
   const restaurant = new Restaurant(restaurantData);
   await restaurant.save();
 
-  await Hotel.findByIdAndUpdate(req.body.hotelId, {restaurantId: restaurant._id});
+  await Hotel.findByIdAndUpdate(req.body.hotelId, {
+    restaurantId: restaurant._id,
+  });
   const token = restaurant.generateAuthToken();
   res.send(token);
 });
@@ -64,16 +89,24 @@ router.put("/", [auth, adminMiddleware], async (req, res) => {
         username: newUsername,
       })
       .then(async () => {
-        let username = await Restaurant.findOne({username: newUsername});
+        let username = await Restaurant.findOne({
+          username: newUsername,
+        });
         if (username)
-          return res.status(400).send({property: "username", msg: "Username Already Taken"});
+          return res.status(400).send({
+            property: "username",
+            msg: "Username Already Taken",
+          });
         await Restaurant.findByIdAndUpdate(req.body.restaurantId, {username: newUsername});
         res.send(
           await Restaurant.findById(req.body.restaurantId).select({name: 1, email: 1, username: 1})
         );
       })
       .catch(error => {
-        return res.status(400).send({property: "username", msg: error.errors.toString()});
+        return res.status(400).send({
+          property: "username",
+          msg: error.errors.toString(),
+        });
       });
   }
 
@@ -89,7 +122,10 @@ router.put("/", [auth, adminMiddleware], async (req, res) => {
         );
       })
       .catch(error => {
-        return res.status(400).send({property: "name", msg: error.errors.toString()});
+        return res.status(400).send({
+          property: "name",
+          msg: error.errors.toString(),
+        });
       });
   }
 });

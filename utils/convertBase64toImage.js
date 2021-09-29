@@ -15,7 +15,7 @@ module.exports = async function (email, base64) {
     .resize(1920, 1080)
     .toFile(newPath)
     .catch(err => console.log(err));
-  console.log(newPath,"newp");
-  
+  console.log(newPath, "newp");
+
   return newPath;
 };

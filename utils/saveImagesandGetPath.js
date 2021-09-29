@@ -7,7 +7,9 @@ module.exports = async function (req, method) {
   }
 
   if (method === "put" && !req.body?.isMainPhotoChanged) {
-    let result = await Room.findById(req.params.id).select({mainPhoto: 1});
+    let result = await Room.findById(req.params.id).select({
+      mainPhoto: 1,
+    });
     req.body.mainPhoto = result.mainPhoto;
   }
 

@@ -5,8 +5,8 @@ const auth = require("../../middleware/auth");
 const validateObjectId = require("../../middleware/validateObjectId");
 const {Review} = require("../../models/review");
 
-router.get("/:id", [auth,guestMiddleware,validateObjectId], async (req, res) => {
-  const review= await Review.findById(req.params.id)
+router.get("/:id", [auth, guestMiddleware, validateObjectId], async (req, res) => {
+  const review = await Review.findById(req.params.id);
   res.send(review);
 });
 

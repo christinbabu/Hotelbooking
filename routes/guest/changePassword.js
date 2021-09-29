@@ -12,7 +12,10 @@ router.post("/", [auth, guestMiddleware, validate(validateGuestPassword)], async
   let validPassword = await bcrypt.compare(req.body.oldPassword, guest.password);
 
   if (!validPassword)
-    return res.status(400).send({property: "oldPassword", msg: "Old password is wrong"});
+    return res.status(400).send({
+      property: "oldPassword",
+      msg: "Old password is wrong",
+    });
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);

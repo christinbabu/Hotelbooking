@@ -15,7 +15,10 @@ router.get("/", [auth, guestMiddleware], async (req, res) => {
   let finalData = [];
   let bookings;
   if (req.query.isStayCompleted === "true") {
-    bookings = await Booking.find({guestId: req.user._id, status: "checkedout"}).lean();
+    bookings = await Booking.find({
+      guestId: req.user._id,
+      status: "checkedout",
+    }).lean();
   } else {
     bookings = await Booking.find({guestId: req.user._id}).where("status").ne("checkedout").lean();
   }

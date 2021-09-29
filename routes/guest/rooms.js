@@ -57,7 +57,13 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-  let room = [await Room.findById(req.params.id).select({photos: 1, facilities: 1, mainPhoto: 1})];
+  let room = [
+    await Room.findById(req.params.id).select({
+      photos: 1,
+      facilities: 1,
+      mainPhoto: 1,
+    }),
+  ];
   if (!room[0]) return res.status(404).send("room with given id not found");
   room = await retrieveMainPhoto(room);
   room = await retrieveOtherPhotos(room);

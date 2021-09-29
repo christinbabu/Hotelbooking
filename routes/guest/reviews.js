@@ -57,18 +57,29 @@ router.post("/:id", [auth, guestMiddleware, validateObjectId], async (req, res) 
   const review = new Review(req.body);
   await review.save();
 
-  await Hotel.findByIdAndUpdate(hotelId, {$push: {reviewIds: review._id}});
+  await Hotel.findByIdAndUpdate(hotelId, {
+    $push: {reviewIds: review._id},
+  });
 
   const rating = [];
   for (let i = 0; i < 5; i++) {
-    rating.push(await Review.find({rating: i + 1, hotelId}).countDocuments());
+    rating.push(
+      await Review.find({
+        rating: i + 1,
+        hotelId,
+      }).countDocuments()
+    );
   }
 
-  await Hotel.findByIdAndUpdate(hotelId, {$set: {reviewScore: average(rating)}});
+  await Hotel.findByIdAndUpdate(hotelId, {
+    $set: {reviewScore: average(rating)},
+  });
   await Guest.findByIdAndUpdate(req.user._id, {
     $push: {reviewedHotelIds: hotelId, reviewIds: review._id},
   });
-  await Booking.findByIdAndUpdate(bookingId, {reviewId: review._id});
+  await Booking.findByIdAndUpdate(bookingId, {
+    reviewId: review._id,
+  });
   res.send(review);
 });
 
@@ -89,9 +100,16 @@ router.put("/:id", [auth, guestMiddleware, validateObjectId], async (req, res) =
 
   const rating = [];
   for (let i = 0; i < 5; i++) {
-    rating.push(await Review.find({rating: i + 1, hotelId}).countDocuments());
+    rating.push(
+      await Review.find({
+        rating: i + 1,
+        hotelId,
+      }).countDocuments()
+    );
   }
-  await Hotel.findByIdAndUpdate(hotelId, {$set: {reviewScore: average(rating)}});
+  await Hotel.findByIdAndUpdate(hotelId, {
+    $set: {reviewScore: average(rating)},
+  });
   res.send(review);
 });
 

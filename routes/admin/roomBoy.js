@@ -12,7 +12,9 @@ const {Booking} = require("../../models/booking");
 const removeImage = require("../../utils/deleteFolder");
 
 router.get("/", [auth, adminMiddleware], async (req, res) => {
-  const roomBoys = await RoomBoy.find({currentHotelId: req.query.hotelId});
+  const roomBoys = await RoomBoy.find({
+    currentHotelId: req.query.hotelId,
+  });
   if (!roomBoys) return res.status(404).send("No room boys found");
   res.send(roomBoys);
 });
@@ -25,7 +27,9 @@ router.get("/:id", [auth, adminMiddleware, validateObjectId], async (req, res) =
 });
 
 router.post("/", [auth, adminMiddleware, validate(validateRoomBoy)], async (req, res) => {
-  const roomboy = await RoomBoy.findOne({aadharNumber: req.body.aadharNumber});
+  const roomboy = await RoomBoy.findOne({
+    aadharNumber: req.body.aadharNumber,
+  });
   if (roomboy) return res.status(400).send("This Room Boy already exists");
   await createFolder(req.user.email);
 
@@ -55,10 +59,10 @@ router.delete("/:id", [auth, adminMiddleware, validateObjectId], async (req, res
 
   const deletedRoomBoy = await RoomBoy.findByIdAndRemove(req.params.id);
   removeImage(deletedRoomBoy.photo, function (error) {
-      if(error){
-          console.log(error);
-      }
-    });
+    if (error) {
+      console.log(error);
+    }
+  });
   const roomBoys = await RoomBoy.find();
   res.send(roomBoys);
 });

@@ -17,7 +17,10 @@ router.post(
 
     let validPassword = await bcrypt.compare(req.body.oldPassword, admin.password);
     if (!validPassword)
-      return res.status(400).send({property: "oldPassword", msg: "Admin password is wrong"});
+      return res.status(400).send({
+        property: "oldPassword",
+        msg: "Admin password is wrong",
+      });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);

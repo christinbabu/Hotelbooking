@@ -9,7 +9,9 @@ const {Guest} = require("../../models/guest");
 
 router.get("/:id", async (req, res) => {
   const linkReviewId = req.params.id;
-  const booking = await Booking.find({linkReviewId: linkReviewId});
+  const booking = await Booking.find({
+    linkReviewId: linkReviewId,
+  });
   if (!booking[0]) return res.status(400).send("Invalid URL");
   const review = await Review.findById(booking[0].reviewId);
   res.send(review);
@@ -58,19 +60,33 @@ router.post("/:id", async (req, res) => {
   } else {
     review = new Review(req.body);
     await review.save();
-    await Hotel.findByIdAndUpdate(booking.hotelId, {$push: {reviewIds: review._id}});
-    await Guest.findByIdAndUpdate(booking.guestId, {
-      $push: {reviewedHotelIds: booking.hotelId, reviewIds: review._id},
+    await Hotel.findByIdAndUpdate(booking.hotelId, {
+      $push: {reviewIds: review._id},
     });
-    await Booking.findByIdAndUpdate(booking._id, {reviewId: review._id});
+    await Guest.findByIdAndUpdate(booking.guestId, {
+      $push: {
+        reviewedHotelIds: booking.hotelId,
+        reviewIds: review._id,
+      },
+    });
+    await Booking.findByIdAndUpdate(booking._id, {
+      reviewId: review._id,
+    });
   }
 
   const rating = [];
   for (let i = 0; i < 5; i++) {
-    rating.push(await Review.find({rating: i + 1, hotelId: review.hotelId}).countDocuments());
+    rating.push(
+      await Review.find({
+        rating: i + 1,
+        hotelId: review.hotelId,
+      }).countDocuments()
+    );
   }
 
-  await Hotel.findByIdAndUpdate(review.hotelId, {$set: {reviewScore: average(rating)}});
+  await Hotel.findByIdAndUpdate(review.hotelId, {
+    $set: {reviewScore: average(rating)},
+  });
   res.send(review);
 });
 

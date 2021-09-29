@@ -153,7 +153,9 @@ router.put(
     let startingPrices = [];
     startingPrices.push(startingRatePerDay);
     startingPrices.push(hotel.startingRatePerDay);
-    await Hotel.findByIdAndUpdate(hotelId, {startingRatePerDay: _.min(startingPrices)});
+    await Hotel.findByIdAndUpdate(hotelId, {
+      startingRatePerDay: _.min(startingPrices),
+    });
     res.send(room);
   }
 );

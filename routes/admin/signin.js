@@ -7,7 +7,11 @@ const adminMiddleware = require("../../middleware/admin");
 const {Admin} = require("../../models/admin");
 
 router.get("/", [auth, adminMiddleware], async (req, res) => {
-  let result = await Admin.findById(req.user._id).select({name: 1, email: 1, username: 1});
+  let result = await Admin.findById(req.user._id).select({
+    name: 1,
+    email: 1,
+    username: 1,
+  });
   if (!result) return res.status(400).send("User not found");
   res.send(result);
 });
