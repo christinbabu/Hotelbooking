@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const findGuest = require("../../utils/findGuest");
 const validate = require("../../middleware/validate");
 const resetPasswordMail = require("../../services/resetPasswordMail");
-const {validateGuestPassword} = require("../../models/guest");
+const {validateResetGuestPassword} = require("../../models/guest");
 const {encrypt, decrypt} = require("../../utils/encryption");
 
 router.post("/", async (req, res) => {
@@ -25,7 +25,7 @@ router.post("/", async (req, res) => {
   res.send("Link Sent Successfully");
 });
 
-router.put("/:token", validate(validateGuestPassword), async (req, res) => {
+router.put("/:token", validate(validateResetGuestPassword), async (req, res) => {
   let token = req.params.token;
   let decoded;
 

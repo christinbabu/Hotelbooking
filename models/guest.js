@@ -116,6 +116,20 @@ function validateGuestPassword(data) {
   return schema.validate(data);
 }
 
+function validateResetGuestPassword(data) {
+  const schema = Yup.object({
+    newPassword: Yup.string()
+      .required("Password is required")
+      .min(6)
+      .max(256)
+      .label("Password"),
+    confirmPassword: Yup.string().oneOf([Yup.ref("newPassword"), null], "Passwords must match"),
+  });
+
+  return schema.validate(data);
+}
+
 exports.Guest = Guest;
 exports.validateGuest = validateGuest;
 exports.validateGuestPassword = validateGuestPassword;
+exports.validateResetGuestPassword = validateResetGuestPassword;

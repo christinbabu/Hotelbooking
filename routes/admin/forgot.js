@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const findAdmin = require("../../utils/findAdmin");
 const validate = require("../../middleware/validate");
 const resetPasswordMail = require("../../services/resetPasswordMail");
-const {validateAdminPassword} = require("../../models/admin");
+const {validateResetAdminPassword} = require("../../models/admin");
 const {encrypt, decrypt} = require("../../utils/encryption");
 
 router.post("/", async (req, res) => {
@@ -21,11 +21,11 @@ router.post("/", async (req, res) => {
   let encryptedResetToken = encrypt(resetToken);
   admin.resettoken = encryptedResetToken;
   await admin.save();
-  resetPasswordMail(admin["email"], resetToken, admin?.name);
+  resetPasswordMail(admin["email"], resetToken, admin?.name,true);
   res.send("Link Sent Successfully");
 });
 
-router.put("/:token", validate(validateAdminPassword), async (req, res) => {
+router.put("/:token", validate(validateResetAdminPassword), async (req, res) => {
   let token = req.params.token;
   let decoded;
 
@@ -44,7 +44,7 @@ router.put("/:token", validate(validateAdminPassword), async (req, res) => {
   if (token !== decryptedResetToken) return res.status(400).send("Something went wrong. Try again");
 
   const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(req.body.password, salt);
+  const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
 
   admin.password = hashedPassword;
   admin.resettoken = null;

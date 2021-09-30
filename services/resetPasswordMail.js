@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-module.exports = function (userEmail, resetToken, userName) {
+module.exports = function (userEmail, resetToken, userName,admin) {
   const transporter = nodemailer.createTransport({
     host: "smtp.ethereal.email",
     port: 587,
@@ -11,6 +11,13 @@ module.exports = function (userEmail, resetToken, userName) {
       pass: process.env.ADMIN_PASSWORD,
     },
   });
+  let url;
+  if(admin){
+    url=`http://localhost:3000/admin/resetpassword/${resetToken}`
+  }else{
+    url=`http://localhost:3000/resetpassword/${resetToken}`
+  }
+
 
   var mailOptions = {
     from: process.env.ADMIN_EMAIL,
@@ -823,7 +830,7 @@ module.exports = function (userEmail, resetToken, userName) {
                                             width: auto;
                                           "
                                           ><a
-                                            href="http://localhost:3000/resetpassword/${resetToken}"
+                                            href="${url}"
                                             class="es-button"
                                             target="_blank"
                                             style="

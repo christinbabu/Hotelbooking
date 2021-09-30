@@ -98,6 +98,20 @@ function validateAdminPassword(data) {
   return schema.validate(data);
 }
 
+function validateResetAdminPassword(data) {
+  const schema = Yup.object({
+    newPassword: Yup.string()
+      .required("Password is required")
+      .min(6)
+      .max(256)
+      .label("Password"),
+    confirmPassword: Yup.string().oneOf([Yup.ref("newPassword"), null], "Passwords must match"),
+  });
+
+  return schema.validate(data);
+}
+
 exports.Admin = Admin;
 exports.validateAdmin = validateAdmin;
 exports.validateAdminPassword = validateAdminPassword;
+exports.validateResetAdminPassword = validateResetAdminPassword;
