@@ -23,6 +23,21 @@ const hotelSchema = new mongoose.Schema({
     },
     required: true,
   },
+  landLine: {
+    type: String,
+    validate: {
+      validator: function (v) {
+        return v && !Object.is(Number(v), NaN) && v.length === 11;
+      },
+      message: "This is not a valid landline number",
+    },
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    validate: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+  },
   address: {
     type: String,
     required: true,
@@ -145,6 +160,11 @@ function validateHotel(data) {
       .required()
       .length(12)
       .matches(/^[0-9]+$/, "Mobile number must include only numbers"),
+    landLine: Yup.string()
+      .required()
+      .length(11)
+      .matches(/^[0-9]+$/, "Land Line number must include only numbers"),
+    email: Yup.string().required("Email is required").email("Email must be valid").label("Email"),
     address: Yup.string().required().min(8).max(255),
     description: Yup.string().required().min(120).max(160),
     city: Yup.string().required().min(1).max(50),
