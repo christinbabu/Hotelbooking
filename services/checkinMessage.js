@@ -2,6 +2,9 @@ const fast2sms = require("fast-two-sms");
 
 module.exports = function (booking, phoneNumber) {
   phoneNumber = phoneNumber.toString();
+  if(phoneNumber.length === 12){
+    phoneNumber = phoneNumber.substring(2, Infinity)
+  }
   if (phoneNumber.charAt(0) == "+") {
     phoneNumber = phoneNumber.substring(3, Infinity);
   } else {
@@ -9,6 +12,7 @@ module.exports = function (booking, phoneNumber) {
   }
 
   let message = `You have successfully checkedin to your room. 
+  Your Booking ID is ${booking.bookingId}. Don't share Booking ID with anyone until you complete your stay.
   Your room numbers are ${booking.roomFinalDetails.map(data => data.roomNumber + ", ")}`;
 
   fast2sms
