@@ -25,6 +25,7 @@ router.get("/:id", [validateObjectId], async (req, res) => {
 
 router.post("/:id", [auth, guestMiddleware, validateObjectId], async (req, res) => {
   const hotelId = req.params.id;
+  
   const {bookingId} = req.body;
   const {previousBookedHotelDetails} = await Guest.findById(req.user._id);
   let eligibleToReview = previousBookedHotelDetails.includes(hotelId);

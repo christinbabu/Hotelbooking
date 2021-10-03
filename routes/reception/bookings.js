@@ -162,12 +162,19 @@ router.get("/upcoming", [auth, receptionMiddleware], async (req, res) => {
   let bookings;
   if (selectedDayRange?.from) {
     bookings = await Booking.find()
+      .where("hotelId")
+      .in(req.user.hotelId)
       .where("startingDayOfStay")
       .gte(allTheDays[0])
       .lte(allTheDays[allTheDays.length - 1])
       .lean();
   } else {
-    bookings = await Booking.find().where("startingDayOfStay").gt(newdate).lean();
+    bookings = await Booking.find()
+      .where("hotelId")
+      .in(req.user.hotelId)
+      .where("startingDayOfStay")
+      .gt(newdate)
+      .lean();
   }
 
   if (!bookings[0]) return res.status(404).send("No bookings available");
@@ -186,7 +193,12 @@ router.get("/upcoming", [auth, receptionMiddleware], async (req, res) => {
 });
 
 router.get("/staying", [auth, receptionMiddleware], async (req, res) => {
-  bookings = await Booking.find().where("status").eq("checkedin").lean();
+  bookings = await Booking.find()
+    .where("hotelId")
+    .in(req.user.hotelId)
+    .where("status")
+    .eq("checkedin")
+    .lean();
   if (!bookings[0]) return res.status(404).send("No bookings available");
 
   let finalData = [];
@@ -538,6 +550,8 @@ router.get("/completed", [auth, receptionMiddleware], async (req, res) => {
   let bookings;
   if (selectedDayRange?.from) {
     bookings = await Booking.find()
+      .where("hotelId")
+      .in(req.user.hotelId)
       .where("endingDayOfStay")
       .gte(allTheDays[0])
       .lte(allTheDays[allTheDays.length - 1])
@@ -545,7 +559,12 @@ router.get("/completed", [auth, receptionMiddleware], async (req, res) => {
       .eq("checkedout")
       .lean();
   } else {
-    bookings = await Booking.find().where("status").eq("checkedout").lean();
+    bookings = await Booking.find()
+      .where("hotelId")
+      .in(req.user.hotelId)
+      .where("status")
+      .eq("checkedout")
+      .lean();
   }
 
   if (!bookings[0]) return res.status(404).send("No bookings available");

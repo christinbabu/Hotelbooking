@@ -9,7 +9,12 @@ const {Booking} = require("../../models/booking");
 const {Guest} = require("../../models/guest");
 
 router.get("/staying", [auth, restaurantMiddleware], async (req, res) => {
-  bookings = await Booking.find().where("status").eq("checkedin").lean();
+  bookings = await Booking.find()
+    .where("hotelId")
+    .in(req.user.hotelId)
+    .where("status")
+    .eq("checkedin")
+    .lean();
   if (!bookings[0]) return res.status(404).send("No bookings available");
 
   let finalData = [];
