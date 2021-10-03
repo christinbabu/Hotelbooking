@@ -516,7 +516,7 @@ module.exports = function (userEmail, resetToken, userName,admin) {
                                       <td align="center" style="padding: 0; margin: 0; font-size: 0px">
                                         <img
                                           class="adapt-img"
-                                          src="https://lgshxr.stripocdn.email/content/guids/CABINET_16dc8bea2c14a00d1ca3f6b8ead30165/images/30441630929922693.png"
+                                          src="https://hotelbook-react.herokuapp.com/static/media/adithyalogo.8ed17367.png"
                                           alt
                                           style="
                                             display: block;

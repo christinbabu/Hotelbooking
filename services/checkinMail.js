@@ -542,7 +542,7 @@ module.exports = function (userEmail, booking) {
                                   <td align="center" style="padding: 0; margin: 0; font-size: 0px">
                                     <img
                                       class="adapt-img"
-                                      src="https://lqcdfn.stripocdn.email/content/guids/CABINET_1374df08c14cd7d7b7b1369a74bf2cf2/images/62891630911721920.png"
+                                      src="https://hotelbook-react.herokuapp.com/static/media/adithyalogo.8ed17367.png"
                                       alt
                                       style="
                                         display: block;
@@ -1163,7 +1163,7 @@ module.exports = function (userEmail, booking) {
                                     style="padding: 0; margin: 0; font-size: 0px"
                                   >
                                     <img
-                                      src="https://lqcdfn.stripocdn.email/content/guids/CABINET_1374df08c14cd7d7b7b1369a74bf2cf2/images/62891630911721920.png"
+                                      src="https://hotelbook-react.herokuapp.com/static/media/adithyalogo.8ed17367.png"
                                       alt="Petshop logo"
                                       title="Petshop logo"
                                       width="108"
@@ -1200,7 +1200,7 @@ module.exports = function (userEmail, booking) {
                                         font-size: 12px;
                                       "
                                     >
-                                      Po Box 3453 Colins St.
+                                      Adithya Group of Hotels
                                     </p>
                                     <p
                                       style="
@@ -1214,7 +1214,6 @@ module.exports = function (userEmail, booking) {
                                         font-size: 12px;
                                       "
                                     >
-                                      Ceduna 4096 Australia
                                     </p>
                                   </td>
                                 </tr>
@@ -1236,31 +1235,27 @@ module.exports = function (userEmail, booking) {
                                         font-size: 12px;
                                       "
                                     >
-                                      <a
-                                        target="_blank"
-                                        href="tel:123456789"
+                                      <p
                                         style="
                                           -webkit-text-size-adjust: none;
                                           -ms-text-size-adjust: none;
                                           mso-line-height-rule: exactly;
-                                          text-decoration: underline;
+                                          text-decoration: none;
                                           color: #333333;
                                           font-size: 12px;
                                         "
-                                        >123456789</a
-                                      ><br /><a
-                                        target="_blank"
-                                        href="mailto:your@mail.com"
+                                        >+91 9483236255</
+                                      p><br /><p
                                         style="
                                           -webkit-text-size-adjust: none;
                                           -ms-text-size-adjust: none;
                                           mso-line-height-rule: exactly;
-                                          text-decoration: underline;
+                                          text-decoration: none;
                                           color: #333333;
                                           font-size: 12px;
                                         "
-                                        >your@mail.com</a
-                                      >
+                                        >adithyagroupofhotels@gmail.com</
+                                      p>
                                     </p>
                                   </td>
                                 </tr>
@@ -1317,7 +1312,6 @@ module.exports = function (userEmail, booking) {
                                         font-size: 20px;
                                       "
                                     >
-                                      Information
                                     </p>
                                   </td>
                                 </tr>
@@ -1335,20 +1329,7 @@ module.exports = function (userEmail, booking) {
                                         font-size: 12px;
                                       "
                                     >
-                                      Vector graphics designed by
-                                      <a
-                                        target="_blank"
-                                        href="http://www.freepik.com/"
-                                        style="
-                                          -webkit-text-size-adjust: none;
-                                          -ms-text-size-adjust: none;
-                                          mso-line-height-rule: exactly;
-                                          text-decoration: underline;
-                                          color: #333333;
-                                          font-size: 12px;
-                                        "
-                                        >Freepik</a
-                                      >.<br />
+                                      <br />
                                     </p>
                                     <p
                                       style="
@@ -1362,8 +1343,7 @@ module.exports = function (userEmail, booking) {
                                         font-size: 12px;
                                       "
                                     >
-                                      You are receiving this email because you have visited our site
-                                      or asked us about regular newsletter<br />
+                                      <br />
                                     </p>
                                   </td>
                                 </tr>
@@ -1385,49 +1365,7 @@ module.exports = function (userEmail, booking) {
                                         font-size: 12px;
                                       "
                                     >
-                                      <a
-                                        target="_blank"
-                                        href=""
-                                        style="
-                                          -webkit-text-size-adjust: none;
-                                          -ms-text-size-adjust: none;
-                                          mso-line-height-rule: exactly;
-                                          text-decoration: underline;
-                                          color: #333333;
-                                          font-size: 12px;
-                                          line-height: 18px;
-                                        "
-                                        class="unsubscribe"
-                                        >Unsubscribe</a
-                                      >
-                                      ♦
-                                      <a
-                                        target="_blank"
-                                        href="https://viewstripo.email"
-                                        style="
-                                          -webkit-text-size-adjust: none;
-                                          -ms-text-size-adjust: none;
-                                          mso-line-height-rule: exactly;
-                                          text-decoration: underline;
-                                          color: #333333;
-                                          font-size: 12px;
-                                        "
-                                        >Update Preferences</a
-                                      >
-                                      ♦
-                                      <a
-                                        target="_blank"
-                                        href="https://viewstripo.email"
-                                        style="
-                                          -webkit-text-size-adjust: none;
-                                          -ms-text-size-adjust: none;
-                                          mso-line-height-rule: exactly;
-                                          text-decoration: underline;
-                                          color: #333333;
-                                          font-size: 12px;
-                                        "
-                                        >Customer Support</a
-                                      >
+                                      
                                     </p>
                                   </td>
                                 </tr>
