@@ -16,7 +16,7 @@ router.get("/staying", [auth, restaurantMiddleware], async (req, res) => {
     .eq("checkedin")
     .lean();
   if (!bookings[0]) return res.status(404).send("No bookings available");
-
+      
   let finalData = [];
   for (i = 0; i < bookings.length; i++) {
     let roomNumbers = [];
@@ -77,6 +77,7 @@ router.post("/addtobill", [auth, restaurantMiddleware], async (req, res) => {
     booking.markModified("restaurantBill");
     await booking.save();
   }
+  
   res.send("done");
 });
 
